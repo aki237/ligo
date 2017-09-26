@@ -6,7 +6,9 @@ const (
 	ErrFuncNotFound LigoError = "Function not defined in scope"
 )
 
+// Required constants for the variable type
 const (
+	TYPE_Err             Type = -0x00
 	TYPE_Int             Type = 0x000
 	TYPE_Float           Type = 0x001
 	TYPE_Bool            Type = 0x002

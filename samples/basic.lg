@@ -1,0 +1,68 @@
+;; importing the "base" package
+(require "base")
+
+;; declaring variables
+(var numbers [1 2 3 4 5 6 7])
+(var sum 0)
+
+;; simple loop named in
+;; syntax is (in array iterator [subexp])
+(in numbers number
+    (progn
+      (set sum (+ sum number))))
+
+;; simple function to print variables.
+;; Found in the base package.
+(printf "Sum from 'in' loop : %d\n" sum)
+
+;; another type of loop with keyword of the same name is
+;; like while loop from C-style languages with little
+;; more control over the loop.
+(var i 0)
+(var sum2 0)
+
+(loop (< i (len numbers))
+      (progn
+        (set sum2 (+ sum2 (array-index numbers i)))
+        (set i (+ i 1))
+        ))
+
+(printf "Sum from 'loop' loop : %d\n" sum2)
+
+;; if construct
+(if (< sum 18)
+    (println "You are not an adult")
+  ;; Leave this blank for no else clause
+  (println "You are an adult")
+  )
+
+;; You can return from a if construct. This can be
+;; helpful in setting variables
+(var message (if (< sum 18)
+                  "You are not an adult"
+                "You are an adult"))
+
+(printf "The message is : %s\n" message)
+
+;; defining function is very simple in ligo.
+;; This is almost similar to function constructs
+;; from modern languages but spiced up with the
+;; goodness of parantheses.
+;; Simple example would be:
+;; ```lisp
+;; (fn functionName |parameter1 parameter2 parameter3 ...restParameters|
+;;        (subExp))
+;; ```
+;; Note that the "rest" variate parameter is
+;; optional and if used, should be the last parameter.
+;; Else the interpreter will throw error.
+(fn greet |name|
+    (progn
+      (printf "Hello, %s\n" name)))
+
+
+(greet (input "Enter your name: "))
+
+;; Deleting the variables from the vm
+(delete sum)
+(delete numbers)

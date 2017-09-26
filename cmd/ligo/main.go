@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"plugin"
 
-	"github.com/aki237/ligo"
+	"github.com/aki237/ligo/pkg/ligo"
 )
 
 var packages = make([]string, 0)

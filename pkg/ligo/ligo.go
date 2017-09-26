@@ -2,6 +2,7 @@ package ligo
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"regexp"
 	"strconv"
@@ -680,8 +681,8 @@ func (vm *VM) NewScope() *VM {
 	return nvm
 }
 
-func (vm *VM) LoadFile(fileName string) error {
-	ltxtb, err := ioutil.ReadFile(fileName)
+func (vm *VM) LoadFile(input io.Reader) error {
+	ltxtb, err := ioutil.ReadAll(input)
 	if err != nil {
 		return err
 	}

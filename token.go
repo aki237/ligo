@@ -5,7 +5,30 @@ import (
 	"strings"
 )
 
+func StripComments(ltxt string) string {
+	lines := strings.Split(ltxt, "\n")
+
+	inQuotes := false
+	final := ""
+	for _, line := range lines {
+		for _, ch := range line {
+			if ch == '"' {
+				inQuotes = !inQuotes
+				final += string(ch)
+				continue
+			}
+			if ch == ';' && !inQuotes {
+				break
+			}
+			final += string(ch)
+		}
+		final += "\n"
+	}
+	return final
+}
+
 func ScanTokens(ltxt string) ([]string, error) {
+	ltxt = StripComments(ltxt)
 	strList := make([]string, 0)
 	ltxt = strings.TrimSpace(ltxt)
 	if len(ltxt) < 2 {

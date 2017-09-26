@@ -38,7 +38,7 @@ func VMRequire(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		panic("require : wrong number of arguments")
 	}
 	lib := a[0]
-	if lib.Type != ligo.TYPE_String {
+	if lib.Type != ligo.TypeString {
 		panic("require : expected a string, got " + lib.GetTypeString())
 	}
 
@@ -47,7 +47,7 @@ func VMRequire(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if err != nil {
 		panic(err)
 	}
-	return ligo.Variable{Type: ligo.TYPE_Nil, Value: nil}
+	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
 }
 
 func VMDlLoad(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -68,7 +68,7 @@ func VMDlLoad(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 	init.(func(*ligo.VM))(vm)
 
-	return ligo.Variable{Type: ligo.TYPE_Nil, Value: nil}
+	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
 }
 
 func exists(dir string) bool {
@@ -85,10 +85,10 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 	home := os.Getenv("HOME")
 	dir := filepath.Join(home, "lispace", "lib", packageName)
 	if !exists(dir) {
-		return ligo.LigoError("Package \"" + packageName + "\" not found in the system")
+		return ligo.Error("Package \"" + packageName + "\" not found in the system")
 	}
 	if info, _ := os.Stat(dir); !info.IsDir() {
-		return ligo.LigoError("Package \"" + packageName + "\" is not a valid directory")
+		return ligo.Error("Package \"" + packageName + "\" is not a valid directory")
 	}
 
 	fileInfos, err := ioutil.ReadDir(dir)

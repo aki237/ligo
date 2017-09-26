@@ -72,23 +72,23 @@ type Variable struct {
 func (v Variable) GetTypeString() (tp string) {
 	tp = ""
 	switch v.Type {
-	case TYPE_Int:
+	case TypeInt:
 		tp = "int"
-	case TYPE_Float:
+	case TypeFloat:
 		tp = "float"
-	case TYPE_Bool:
+	case TypeBool:
 		tp = "bool"
-	case TYPE_String:
+	case TypeString:
 		tp = "string"
-	case TYPE_Nil:
+	case TypeNil:
 		tp = "nil"
-	case TYPE_DFunc, TYPE_IFunc:
+	case TypeDFunc, TypeIFunc:
 		tp = "func"
-	case TYPE_MonoTypeArray:
+	case TypeMonoTypeArray:
 		tp = "array<mono type>"
-	case TYPE_PolyTypeArray:
+	case TypePolyTypeArray:
 		tp = "array<poly type>"
-	case TYPE_Map:
+	case TypeMap:
 		tp = "map"
 	}
 	return
@@ -98,19 +98,19 @@ func (v Variable) GetTypeString() (tp string) {
 func (v Variable) String() string {
 	typeString := "Variable {Type : "
 	switch v.Type {
-	case TYPE_Int:
+	case TypeInt:
 		typeString += "Integer<64>"
-	case TYPE_Float:
+	case TypeFloat:
 		typeString += "Float<64>"
-	case TYPE_String:
+	case TypeString:
 		typeString += "String"
-	case TYPE_Bool:
+	case TypeBool:
 		typeString += "Boolean"
-	case TYPE_MonoTypeArray:
+	case TypeMonoTypeArray:
 		typeString += "Array<MonoType>"
-	case TYPE_PolyTypeArray:
+	case TypePolyTypeArray:
 		typeString += "Array<PolyType>"
-	case TYPE_Nil:
+	case TypeNil:
 		typeString += "Nil"
 	}
 	return typeString + fmt.Sprint(" ,Value : ", v.Value, "}")
@@ -152,7 +152,7 @@ func NewVM() *VM {
 func (vm *VM) GetVariable(token string) (Variable, error) {
 	v := ligoNil
 	if len(token) < 1 {
-		return ligoNil, LigoError("Invalid Token passed")
+		return ligoNil, Error("Invalid Token passed")
 	}
 	switch true {
 	case rArray.MatchString(token):
@@ -174,11 +174,11 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 				continue
 			}
 			if tp != v.Type {
-				tp = TYPE_PolyTypeArray
+				tp = TypePolyTypeArray
 			}
 		}
-		if tp != TYPE_PolyTypeArray {
-			tp = TYPE_MonoTypeArray | tp
+		if tp != TypePolyTypeArray {
+			tp = TypeMonoTypeArray | tp
 		}
 		retVars := Variable{Type: tp, Value: vars}
 		return retVars, nil
@@ -193,17 +193,17 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 		if err != nil {
 			fmt.Println(err)
 		}
-		v = Variable{Type: TYPE_Int, Value: num}
+		v = Variable{Type: TypeInt, Value: num}
 	case rFloat.MatchString(token):
 		num, _ := strconv.ParseFloat(token, 64)
-		v = Variable{Type: TYPE_Float, Value: num}
+		v = Variable{Type: TypeFloat, Value: num}
 	case rString.MatchString(token) || token[0] == '"':
 		token = reformEscapes(token)
-		v = Variable{Type: TYPE_String, Value: token[1 : len(token)-1]}
+		v = Variable{Type: TypeString, Value: token[1 : len(token)-1]}
 	case token == "true":
-		v = Variable{Type: TYPE_Bool, Value: true}
+		v = Variable{Type: TypeBool, Value: true}
 	case token == "false":
-		v = Variable{Type: TYPE_Bool, Value: false}
+		v = Variable{Type: TypeBool, Value: false}
 	case rVariable.MatchString(token):
 		varFromVM, ok := vm.Vars[token]
 		if ok {
@@ -211,21 +211,21 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 			break
 		}
 		if fnc, ok := vm.Funcs[token]; ok {
-			v = Variable{Type: TYPE_IFunc, Value: fnc}
+			v = Variable{Type: TypeIFunc, Value: fnc}
 			break
 		}
 		if fnc, ok := vm.LFuncs[token]; ok {
-			v = Variable{Type: TYPE_DFunc, Value: fnc}
+			v = Variable{Type: TypeDFunc, Value: fnc}
 			break
 		}
 		v = ligoNil
 	default:
 		if fnc, ok := vm.Funcs[token]; ok {
-			v = Variable{Type: TYPE_IFunc, Value: fnc}
+			v = Variable{Type: TypeIFunc, Value: fnc}
 			break
 		}
 		if fnc, ok := vm.LFuncs[token]; ok {
-			v = Variable{Type: TYPE_DFunc, Value: fnc}
+			v = Variable{Type: TypeDFunc, Value: fnc}
 			break
 		}
 	}
@@ -239,7 +239,7 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 // current scope. It also warns if the function is already declared.
 func (vm *VM) setFn(tokens []string) (Variable, error) {
 	if len(tokens) != 4 {
-		return ligoNil, LigoError("A function construct can only have a single returning function")
+		return ligoNil, Error("A function construct can only have a single returning function")
 	}
 	fnName := tokens[1]
 	if _, ok := vm.Funcs[fnName]; ok {
@@ -250,7 +250,7 @@ func (vm *VM) setFn(tokens []string) (Variable, error) {
 	}
 	if !rClosure.MatchString(tokens[2]) {
 		return ligoNil,
-			LigoError("Expected parameter name in the function definition " + fnName + " closure : " + tokens[2])
+			Error("Expected parameter name in the function definition " + fnName + " closure : " + tokens[2])
 	}
 	varNames := getVarsFromClosure(tokens[2])
 	fn := Defined{scopevars: varNames, eval: tokens[3]}
@@ -262,10 +262,10 @@ func (vm *VM) setFn(tokens []string) (Variable, error) {
 // If the variable is not defined already, this will throw an error.
 func (vm *VM) setVar(tokens []string) (Variable, error) {
 	if len(tokens) != 3 {
-		return ligoNil, LigoError("Wrong number of arguments to the keyword.")
+		return ligoNil, Error("Wrong number of arguments to the keyword.")
 	}
 	if !rVariable.MatchString(tokens[1]) {
-		return ligoNil, LigoError("Wrong token found in the variable name")
+		return ligoNil, Error("Wrong token found in the variable name")
 	}
 	v, err := vm.GetVariable(tokens[2])
 	if err != nil {
@@ -273,17 +273,17 @@ func (vm *VM) setVar(tokens []string) (Variable, error) {
 	}
 
 	switch v.Type {
-	case TYPE_IFunc:
+	case TypeIFunc:
 		_, ok := vm.Funcs[tokens[1]]
 		if !ok {
-			return ligoNil, LigoError("Variable not defined. Try \"var\" for creating a new variable")
+			return ligoNil, Error("Variable not defined. Try \"var\" for creating a new variable")
 		}
 		vm.Funcs[tokens[1]] = v.Value.(InBuilt)
 		return ligoNil, nil
-	case TYPE_DFunc:
+	case TypeDFunc:
 		_, ok := vm.LFuncs[tokens[1]]
 		if !ok {
-			return ligoNil, LigoError("Variable not defined. Try \"var\" for creating a new variable")
+			return ligoNil, Error("Variable not defined. Try \"var\" for creating a new variable")
 		}
 		vm.LFuncs[tokens[1]] = v.Value.(Defined)
 		return ligoNil, nil
@@ -295,7 +295,7 @@ func (vm *VM) setVar(tokens []string) (Variable, error) {
 		return ligoNil, nil
 	}
 	if vm.global == nil {
-		return ligoNil, LigoError("Variable '" + tokens[1] + "' not defined. Try \"var\" for creating a new variable")
+		return ligoNil, Error("Variable '" + tokens[1] + "' not defined. Try \"var\" for creating a new variable")
 	}
 	return vm.global.setVar(tokens)
 }
@@ -303,26 +303,26 @@ func (vm *VM) setVar(tokens []string) (Variable, error) {
 // newVar method is used to declare a new variable in the VM and set a value to it.
 func (vm *VM) newVar(tokens []string) (Variable, error) {
 	if len(tokens) != 3 {
-		return ligoNil, LigoError("Wrong number of arguments to the keyword.")
+		return ligoNil, Error("Wrong number of arguments to the keyword.")
 	}
 	if !rVariable.MatchString(tokens[1]) {
-		return ligoNil, LigoError("Wrong token found in the variable name")
+		return ligoNil, Error("Wrong token found in the variable name")
 	}
 	v, err := vm.GetVariable(tokens[2])
 	if err != nil {
 		return ligoNil, err
 	}
 	switch v.Type {
-	case TYPE_IFunc:
+	case TypeIFunc:
 		vm.Funcs[tokens[1]] = v.Value.(InBuilt)
 		return ligoNil, nil
-	case TYPE_DFunc:
+	case TypeDFunc:
 		vm.LFuncs[tokens[1]] = v.Value.(Defined)
 		return ligoNil, nil
 	}
 	_, ok := vm.Vars[tokens[1]]
 	if ok {
-		return ligoNil, LigoError("Variable '" + tokens[1] + "' already defined. Try \"set\" for updating variables")
+		return ligoNil, Error("Variable '" + tokens[1] + "' already defined. Try \"set\" for updating variables")
 	}
 	vm.Vars[tokens[1]] = v
 	return ligoNil, nil
@@ -351,7 +351,7 @@ func (vm *VM) getDefinedFunction(fnName string) (Defined, bool) {
 // runDefinedFunction method is a helper method used to run a passed defined function with passed vars
 func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variable) (Variable, error) {
 	if len(vars) < len(function.scopevars)-1 {
-		return ligoNil, LigoError(fmt.Sprintf("Expected %d arguments, got %d for the %s function",
+		return ligoNil, Error(fmt.Sprintf("Expected %d arguments, got %d for the %s function",
 			len(function.scopevars),
 			len(vars),
 			fnName,
@@ -360,7 +360,7 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 
 	if len(function.scopevars) > 0 && !isVariate(function.scopevars[len(function.scopevars)-1]) {
 		if len(vars) != len(function.scopevars) {
-			return ligoNil, LigoError(fmt.Sprintf("Expected %d arguments, got %d for the %s function",
+			return ligoNil, Error(fmt.Sprintf("Expected %d arguments, got %d for the %s function",
 				len(function.scopevars),
 				len(vars),
 				fnName,
@@ -371,9 +371,9 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 	nvm := vm.NewScope()
 	for i, val := range function.scopevars {
 		switch vars[i].Type {
-		case TYPE_IFunc:
+		case TypeIFunc:
 			nvm.Funcs[val] = vars[i].Value.(InBuilt)
-		case TYPE_DFunc:
+		case TypeDFunc:
 			nvm.LFuncs[val] = vars[i].Value.(Defined)
 		default:
 			if isVariate(val) {
@@ -382,7 +382,7 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 				}
 				val = val[3:]
 				if len(vars) >= i+1 {
-					nvm.Vars[val] = Variable{TYPE_MonoTypeArray, vars[i:]}
+					nvm.Vars[val] = Variable{TypeMonoTypeArray, vars[i:]}
 				}
 				break
 			}
@@ -403,7 +403,7 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 			if err != nil {
 				return ligoNil, err
 			}
-			if v.Type == TYPE_MonoTypeArray || v.Type == TYPE_PolyTypeArray {
+			if v.Type == TypeMonoTypeArray || v.Type == TypePolyTypeArray {
 				vars = append(vars, v.Value.([]Variable)...)
 				continue
 			}
@@ -424,14 +424,14 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 		return vm.runDefinedFunction(function, fnName, vars)
 	}
 	if vm.global == nil {
-		return ligoNil, LigoError("Function '" + fnName + "' not found")
+		return ligoNil, Error("Function '" + fnName + "' not found")
 	}
 	if function, ok := vm.global.getInBuiltFunction(fnName); ok {
 		return vm.runInBuiltFunction(function, vars)
 	}
 	function, ok := vm.global.getDefinedFunction(fnName)
 	if !ok {
-		return ligoNil, LigoError("Function '" + fnName + "' not found")
+		return ligoNil, Error("Function '" + fnName + "' not found")
 	}
 	return vm.runDefinedFunction(function, fnName, vars)
 }
@@ -439,7 +439,7 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 // runLoop method is used to run the "loop" construct
 func (vm *VM) runLoop(tkns []string) (Variable, error) {
 	if len(tkns) != 3 {
-		return ligoNil, LigoError("Illegal loop construct. Can take 3 arguments only.")
+		return ligoNil, Error("Illegal loop construct. Can take 3 arguments only.")
 	}
 	condition := tkns[1]
 	runExp := tkns[2]
@@ -447,8 +447,8 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 	if err != nil {
 		return ligoNil, err
 	}
-	if result.Type != TYPE_Bool {
-		return ligoNil, LigoError("Expected boolean return from the expression : " + condition)
+	if result.Type != TypeBool {
+		return ligoNil, Error("Expected boolean return from the expression : " + condition)
 	}
 	for result.Value.(bool) {
 		_, err := vm.Eval(runExp)
@@ -459,8 +459,8 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 		if err != nil {
 			return ligoNil, err
 		}
-		if result.Type != TYPE_Bool {
-			return ligoNil, LigoError("Expected boolean return from the expression : " + condition)
+		if result.Type != TypeBool {
+			return ligoNil, Error("Expected boolean return from the expression : " + condition)
 		}
 	}
 	return ligoNil, err
@@ -469,7 +469,7 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 // runIn method is used to run the "in" construct
 func (vm *VM) runIn(tkns []string) (Variable, error) {
 	if len(tkns) != 4 {
-		return ligoNil, LigoError("Illegal in loop construct. Can take 4 arguments only.")
+		return ligoNil, Error("Illegal in loop construct. Can take 4 arguments only.")
 	}
 	iterVar := tkns[2]
 	runExp := tkns[3]
@@ -479,14 +479,14 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		return ligoNil, err
 	}
 
-	if array.Type != TYPE_String && array.Type != TYPE_PolyTypeArray && array.Type != TYPE_MonoTypeArray {
-		return ligoNil, LigoError("in : can only iterate thorugh arrays or strings")
+	if array.Type != TypeString && array.Type != TypePolyTypeArray && array.Type != TypeMonoTypeArray {
+		return ligoNil, Error("in : can only iterate thorugh arrays or strings")
 	}
 
 	v, ok := vm.Vars[iterVar]
-	if array.Type == TYPE_String {
+	if array.Type == TypeString {
 		for _, val := range array.Value.(string) {
-			vm.Vars[iterVar] = Variable{Type: TYPE_String, Value: string(val)}
+			vm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
 			_, err = vm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err
@@ -515,13 +515,13 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 // See the samples/basic.lg file for more details.
 func (vm *VM) ifClause(tkns []string) (Variable, error) {
 	if len(tkns) > 4 || len(tkns) < 3 {
-		return ligoNil, LigoError("Illegal if construct. Can take 3 or 4 arguments.")
+		return ligoNil, Error("Illegal if construct. Can take 3 or 4 arguments.")
 	}
 	condition := tkns[1]
 	boolVar, ok := vm.Vars[condition]
 	if condition != "true" && condition != "false" && MatchChars(condition, 0, '(', ')') < 0 && !ok {
 		return ligoNil,
-			LigoError("Expected a boolean value or expression for the if clause condition, got : " + condition)
+			Error("Expected a boolean value or expression for the if clause condition, got : " + condition)
 	}
 
 	successClause := tkns[2]
@@ -539,8 +539,8 @@ func (vm *VM) ifClause(tkns []string) (Variable, error) {
 	} else {
 		result = boolVar
 	}
-	if result.Type != TYPE_Bool {
-		return ligoNil, LigoError("Expected boolean return from the expression : " + condition)
+	if result.Type != TypeBool {
+		return ligoNil, Error("Expected boolean return from the expression : " + condition)
 	}
 	if !result.Value.(bool) {
 		if failureClause == "" {
@@ -562,22 +562,22 @@ func (vm *VM) returnArg(tkns []string) (Variable, error) {
 // deleteVar method is used to delete a variable from the VM
 func (vm *VM) deleteVar(tkns []string) (Variable, error) {
 	if len(tkns) < 2 {
-		return Variable{Type: TYPE_Bool, Value: false}, LigoError("nothing passed to delete")
+		return Variable{Type: TypeBool, Value: false}, Error("nothing passed to delete")
 	}
 	for _, variable := range tkns[1:] {
 		_, ok := vm.Vars[variable]
 		if !ok {
-			return Variable{Type: TYPE_Bool, Value: false}, LigoError("variable not found")
+			return Variable{Type: TypeBool, Value: false}, Error("variable not found")
 		}
 		delete(vm.Vars, variable)
 	}
-	return Variable{Type: TYPE_Bool, Value: true}, nil
+	return Variable{Type: TypeBool, Value: true}, nil
 }
 
 // fork method is used to run the passed sub-expression in a separate go-routine
 func (vm *VM) fork(tkns []string) (Variable, error) {
 	if len(tkns) != 2 {
-		return ligoNil, LigoError("Expected one expression, got " + fmt.Sprint(len(tkns)) + " arguments")
+		return ligoNil, Error("Expected one expression, got " + fmt.Sprint(len(tkns)) + " arguments")
 	}
 	go vm.Eval(tkns[1])
 	return ligoNil, nil
@@ -607,14 +607,14 @@ func (vm *VM) runExpressions(tkns []string) (Variable, error) {
 // pass back it's return
 func (vm *VM) evalString(tkns []string) (Variable, error) {
 	if len(tkns) != 2 {
-		return ligoNil, LigoError("'eval' keyword only accepts 1 argument")
+		return ligoNil, Error("'eval' keyword only accepts 1 argument")
 	}
 	vl, err := vm.GetVariable(tkns[1])
 	if err != nil {
 		return ligoNil, err
 	}
-	if vl.Type != TYPE_String {
-		return ligoNil, LigoError("'eval' keyword only expression string")
+	if vl.Type != TypeString {
+		return ligoNil, Error("'eval' keyword only expression string")
 	}
 	exps := make([]string, 0)
 	line := 0
@@ -628,11 +628,11 @@ func (vm *VM) evalString(tkns []string) (Variable, error) {
 			i = int(off)
 		case " ", "\n", "\r", "\t":
 			if ch == "\n" || ch == "\r" {
-				line += 1
+				line++
 			}
 			continue
 		default:
-			return ligoNil, LigoError(fmt.Sprintf("Unexpected Character at line %d : %s\n", line, ch))
+			return ligoNil, Error(fmt.Sprintf("Unexpected Character at line %d : %s\n", line, ch))
 		}
 	}
 	var retVal Variable
@@ -651,7 +651,7 @@ func (vm *VM) evalString(tkns []string) (Variable, error) {
 func (vm *VM) Eval(stmt string) (Variable, error) {
 	stmt = strings.TrimSpace(stmt)
 	if len(stmt) < 2 {
-		return ligoNil, LigoError("Expected atleast (), got : " + stmt)
+		return ligoNil, Error("Expected atleast (), got : " + stmt)
 	}
 	if !rExpression.MatchString(stmt) && MatchChars(stmt, 0, '(', ')') < 0 {
 		return vm.GetVariable(stmt)
@@ -688,10 +688,8 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 		return vm.fork(tkns)
 	case "delete":
 		return vm.deleteVar(tkns)
-	default:
-		return vm.run(tkns)
 	}
-	return ligoNil, nil
+	return vm.run(tkns)
 }
 
 // Clone method is used to clone the VM and return the clone one.

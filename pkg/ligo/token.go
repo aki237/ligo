@@ -35,16 +35,16 @@ func ScanTokens(ltxt string) ([]string, error) {
 	strList := make([]string, 0)
 	ltxt = strings.TrimSpace(ltxt)
 	if len(ltxt) < 2 {
-		return nil, LigoError("Expected atleast (), got : " + ltxt)
+		return nil, Error("Expected atleast (), got : " + ltxt)
 	}
 
 	if ltxt[0] != '(' {
-		return nil, LigoError("Expected '(' at the start of the expression, got : " + string(ltxt[0]) + "\n" +
+		return nil, Error("Expected '(' at the start of the expression, got : " + string(ltxt[0]) + "\n" +
 			ltxt,
 		)
 	}
 	if ltxt[len(ltxt)-1] != ')' {
-		return nil, LigoError("Expected ')' at the start of the expression, got : " + string(ltxt[0]))
+		return nil, Error("Expected ')' at the start of the expression, got : " + string(ltxt[0]))
 	}
 	inQuotes := false
 	inSBkts := false
@@ -70,7 +70,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 			}
 			if !inQuotes {
 				if current != "" {
-					return nil, LigoError("Closure not seperated by a space")
+					return nil, Error("Closure not seperated by a space")
 				}
 				current += c
 				inSBkts = true
@@ -81,7 +81,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 			if !inQuotes {
 				inQuotes = true
 				if current != "" {
-					return nil, LigoError("Not seperated by a space")
+					return nil, Error("Not seperated by a space")
 				}
 				current += "\""
 				continue
@@ -92,52 +92,52 @@ func ScanTokens(ltxt string) ([]string, error) {
 			current = ""
 		case "[":
 			if inSBkts {
-				return nil, LigoError("'[' not expected inside a closure")
+				return nil, Error("'[' not expected inside a closure")
 			}
 			if inQuotes {
 				current += c
 				continue
 			}
 			if current != "" {
-				return nil, LigoError("Array not seperated by a space")
+				return nil, Error("Array not seperated by a space")
 			}
 			off := MatchChars(ltxt, int64(i), '[', ']') + 1
 			current = ltxt[i:off]
 			strList = append(strList, current)
 			i = int(off)
 			if strings.TrimSpace(string(ltxt[i])) != "" && strings.TrimSpace(string(ltxt[i])) != ")" {
-				return nil, LigoError("Unexpected character found at array end : " + string(ltxt[i]))
+				return nil, Error("Unexpected character found at array end : " + string(ltxt[i]))
 			}
 			current = ""
 		case "(":
 			if inSBkts {
-				return nil, LigoError("'(' not expected inside a closure")
+				return nil, Error("'(' not expected inside a closure")
 			}
 			if inQuotes {
 				current += c
 				continue
 			}
 			if current != "" {
-				return nil, LigoError("Expression not seperated by a space")
+				return nil, Error("Expression not seperated by a space")
 			}
 			off := MatchChars(ltxt, int64(i), '(', ')') + 1
 			current = ltxt[i:off]
 			strList = append(strList, current)
 			i = int(off)
 			if strings.TrimSpace(string(ltxt[i])) != "" && strings.TrimSpace(string(ltxt[i])) != ")" {
-				return nil, LigoError("Unexpected character found at expression end : " + string(ltxt[i]))
+				return nil, Error("Unexpected character found at expression end : " + string(ltxt[i]))
 			}
 			current = ""
 		case ")":
 			if inSBkts {
-				return nil, LigoError("')' not expected inside a closure")
+				return nil, Error("')' not expected inside a closure")
 			}
 			if inQuotes {
 				current += c
 				continue
 			}
 			if len(ltxt)-1 != i {
-				return nil, LigoError("Expected EOL, got " + string(ltxt[i]) + " at " + fmt.Sprint(i))
+				return nil, Error("Expected EOL, got " + string(ltxt[i]) + " at " + fmt.Sprint(i))
 			}
 			if current != "" {
 				strList = append(strList, current)
@@ -145,7 +145,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 			}
 		case "]":
 			if inSBkts {
-				return nil, LigoError("']' not expected inside a closure")
+				return nil, Error("']' not expected inside a closure")
 			}
 			if inQuotes {
 				current += c
@@ -158,10 +158,10 @@ func ScanTokens(ltxt string) ([]string, error) {
 		}
 	}
 	if inQuotes {
-		return nil, LigoError("Quote not closed correctly")
+		return nil, Error("Quote not closed correctly")
 	}
 	if inSBkts {
-		return nil, LigoError("Closure not closed correctly")
+		return nil, Error("Closure not closed correctly")
 	}
 	return strList, nil
 }
@@ -182,10 +182,10 @@ func MatchChars(ltxt string, off int64, open byte, close byte) int64 {
 			inQuotes = !inQuotes
 		}
 		if ltxt[i] == open && !inQuotes {
-			count += 1
+			count++
 		}
 		if ltxt[i] == close && !inQuotes {
-			count -= 1
+			count--
 		}
 		if count == 0 {
 			return i

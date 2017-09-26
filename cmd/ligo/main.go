@@ -33,6 +33,8 @@ func run() {
 	}
 }
 
+// VMRequire function is a ligo.InBuilt that is used to load a package.
+// The package system is still not finalized
 func VMRequire(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
 		panic("require : wrong number of arguments")
@@ -50,6 +52,7 @@ func VMRequire(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
 }
 
+// VMDlLoad function is a ligo.InBuilt function that is used to load a package that is a dynamically loadable
 func VMDlLoad(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
 		panic("load-plugin can only take one argument")
@@ -78,6 +81,7 @@ func exists(dir string) bool {
 	return false
 }
 
+// LoadPackage is used to load a package of the name "packageName" and load the functions and others in the passed ligo.VM.
 func LoadPackage(vm *ligo.VM, packageName string) error {
 	if slistContains(packages, packageName) {
 		return nil

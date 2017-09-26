@@ -70,7 +70,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 			}
 			if !inQuotes {
 				if current != "" {
-					return nil, Error("Closure not seperated by a space")
+					return nil, Error("Closure not separated by a space")
 				}
 				current += c
 				inSBkts = true
@@ -81,7 +81,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 			if !inQuotes {
 				inQuotes = true
 				if current != "" {
-					return nil, Error("Not seperated by a space")
+					return nil, Error("Not separated by a space")
 				}
 				current += "\""
 				continue
@@ -99,7 +99,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 				continue
 			}
 			if current != "" {
-				return nil, Error("Array not seperated by a space")
+				return nil, Error("Array not separated by a space")
 			}
 			off := MatchChars(ltxt, int64(i), '[', ']') + 1
 			current = ltxt[i:off]
@@ -118,7 +118,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 				continue
 			}
 			if current != "" {
-				return nil, Error("Expression not seperated by a space")
+				return nil, Error("Expression not separated by a space")
 			}
 			off := MatchChars(ltxt, int64(i), '(', ')') + 1
 			current = ltxt[i:off]

@@ -17,10 +17,20 @@ func run() {
 	vm.Funcs["require"] = VMRequire
 	vm.Funcs["load-plugin"] = VMDlLoad
 	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage %s [filename.lf]\n", os.Args[0])
+		err := vm.LoadFile(os.Stdin)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	f, err := os.Open(os.Args[1])
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	fmt.Println(vm.LoadFile(os.Args[1]))
+	err = vm.LoadFile(f)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 func VMRequire(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -104,7 +114,11 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 			}
 			continue
 		}
-		err := vm.LoadFile(filepath.Join(dir, val.Name()))
+		file, err := os.Open(filepath.Join(dir, val.Name()))
+		if err != nil {
+			return err
+		}
+		err = vm.LoadFile(file)
 		if err != nil {
 			panic(err)
 		}

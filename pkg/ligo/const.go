@@ -1,10 +1,14 @@
 package ligo
 
+// Error contants
 const (
 	ErrSyntaxError  LigoError = "Syntax Error"
 	ErrNoVariable   LigoError = "Variable not found in scope"
 	ErrFuncNotFound LigoError = "Function not defined in scope"
 )
+
+// Type is a type to denote the type of Variables in the VM
+type Type int
 
 // Required constants for the variable type
 const (
@@ -32,5 +36,3 @@ const (
 )
 
 var ligoNil = Variable{TYPE_Nil, nil}
-
-type Type int

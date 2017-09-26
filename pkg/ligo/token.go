@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// StripComments function is used to strip the comments from the passed ligo source
 func StripComments(ltxt string) string {
 	lines := strings.Split(ltxt, "\n")
 
@@ -27,6 +28,8 @@ func StripComments(ltxt string) string {
 	return final
 }
 
+// ScanTokens is used to get token list from a passed ligo expression.
+// This is one of the important functions for parsing a ligo source code.
 func ScanTokens(ltxt string) ([]string, error) {
 	ltxt = StripComments(ltxt)
 	strList := make([]string, 0)
@@ -163,6 +166,8 @@ func ScanTokens(ltxt string) ([]string, error) {
 	return strList, nil
 }
 
+// MatchChars function is used to return the offset at which the matching character of the passed character
+// is found in the passed string. Generally used to match brackets.
 func MatchChars(ltxt string, off int64, open byte, close byte) int64 {
 	if int64(len(ltxt)) <= off {
 		return -1
@@ -189,6 +194,9 @@ func MatchChars(ltxt string, off int64, open byte, close byte) int64 {
 	return -1
 }
 
+// getVarsFromClosure is used to extract all the parameter names from a
+// closure of a function definition in ligo
+// (ie., "|a b v r|" yields an array containing "a", "b", "v" and "r")
 func getVarsFromClosure(cl string) []string {
 	current := ""
 	retParams := make([]string, 0)
@@ -204,4 +212,12 @@ func getVarsFromClosure(cl string) []string {
 		current += string(val)
 	}
 	return retParams
+}
+
+// isVariate is used to check whether a given token string is passed as a variate parameter.
+func isVariate(str string) bool {
+	if len(str) > 4 && str[:3] == "..." && str[3] != '.' {
+		return true
+	}
+	return false
 }

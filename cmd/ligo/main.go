@@ -17,7 +17,7 @@ func run() {
 	vm.Funcs["require"] = VMRequire
 	vm.Funcs["load-plugin"] = VMDlLoad
 	if len(os.Args) < 2 {
-		err := vm.LoadFile(os.Stdin)
+		err := vm.LoadReader(os.Stdin)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -27,7 +27,7 @@ func run() {
 		fmt.Println(err)
 		return
 	}
-	err = vm.LoadFile(f)
+	err = vm.LoadReader(f)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -118,7 +118,7 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 		if err != nil {
 			return err
 		}
-		err = vm.LoadFile(file)
+		err = vm.LoadReader(file)
 		if err != nil {
 			panic(err)
 		}

@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// escape sequences to be replaced with the counterpart in a string
 var escapeSequences = map[string]int{
 	"\\\\": 0x5C,
 	"\\a":  0x07,
@@ -52,6 +53,7 @@ func reformEscapes(str string) string {
 	return ret
 }
 
+// regexp variables for matching the syntax of the script
 var rInteger = regexp.MustCompile("^[+-]?[0-9]+$")
 var rFloat = regexp.MustCompile("^[+-]?[0-9]*\\.[0-9]+$")
 var rString = regexp.MustCompile("^\".*\"$")
@@ -60,11 +62,13 @@ var rExpression = regexp.MustCompile("^\\(.*\\)$")
 var rClosure = regexp.MustCompile("^\\|([[:alpha:]]+[[:alnum:]]*\\s*)*\\.\\.\\.([[:alpha:]]+[[:alnum:]]*\\s*){0,1}|$")
 var rArray = regexp.MustCompile("^\\[(.*\\s*)*\\]$")
 
+// Variable is a struct denoting a value in the VM
 type Variable struct {
 	Type  Type
 	Value interface{}
 }
 
+// GetTypeString method returns a string value corresponding to the type of it's value
 func (v Variable) GetTypeString() (tp string) {
 	tp = ""
 	switch v.Type {
@@ -90,6 +94,7 @@ func (v Variable) GetTypeString() (tp string) {
 	return
 }
 
+// String method implements the Stringer interface for the Variable type
 func (v Variable) String() string {
 	typeString := "Variable {Type : "
 	switch v.Type {
@@ -111,13 +116,18 @@ func (v Variable) String() string {
 	return typeString + fmt.Sprint(" ,Value : ", v.Value, "}")
 }
 
+// Defined struct contains variables needed for storing a function defined in ligo script itself
 type Defined struct {
 	scopevars []string
 	eval      string
 }
 
+// InBuilt type is a function format that is callable from the ligo script
 type InBuilt func(*VM, ...Variable) Variable
 
+// VM struct is a State Struct contains all the variable maps,
+// defined function maps, in-built function maps and a global
+// scope pointing to the global Scope VM
 type VM struct {
 	global *VM
 	Vars   map[string]Variable
@@ -125,6 +135,7 @@ type VM struct {
 	LFuncs map[string]Defined
 }
 
+// NewVM returns a new VM object pointer after initializing the values
 func NewVM() *VM {
 	vm := &VM{}
 	vm.Vars = make(map[string]Variable, 0)
@@ -134,6 +145,10 @@ func NewVM() *VM {
 	return vm
 }
 
+// GetVariable method is used to process the token string passed and get the
+// corresponding value from the VM's memory. This is a crucial function
+// as, if the token passed is a sub expression this method knows to evaluate and
+// return the value of that sub expression.
 func (vm *VM) GetVariable(token string) (Variable, error) {
 	v := ligoNil
 	if len(token) < 1 {
@@ -220,6 +235,8 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 	return v, nil
 }
 
+// setFn is used to parse a ligo function construct and store it in the
+// current scope. It also warns if the function is already declared.
 func (vm *VM) setFn(tokens []string) (Variable, error) {
 	if len(tokens) != 4 {
 		return ligoNil, LigoError("A function construct can only have a single returning function")
@@ -241,6 +258,8 @@ func (vm *VM) setFn(tokens []string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// setVar method is used to set a value to a variable.
+// If the variable is not defined already, this will throw an error.
 func (vm *VM) setVar(tokens []string) (Variable, error) {
 	if len(tokens) != 3 {
 		return ligoNil, LigoError("Wrong number of arguments to the keyword.")
@@ -281,6 +300,7 @@ func (vm *VM) setVar(tokens []string) (Variable, error) {
 	return vm.global.setVar(tokens)
 }
 
+// newVar method is used to declare a new variable in the VM and set a value to it.
 func (vm *VM) newVar(tokens []string) (Variable, error) {
 	if len(tokens) != 3 {
 		return ligoNil, LigoError("Wrong number of arguments to the keyword.")
@@ -308,27 +328,27 @@ func (vm *VM) newVar(tokens []string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// getInBuiltFunction method is a small helper method to get the inbuilt function.
+// If found it returns the inbuilt and true, else nil and false.
 func (vm *VM) getInBuiltFunction(fnName string) (InBuilt, bool) {
 	fn, found := vm.Funcs[fnName]
 	return fn, found
 }
 
+// runInBuiltFunction method is a small helper method to run the passed inbuilt function
+// with the passed variables.
 func (vm *VM) runInBuiltFunction(function InBuilt, vars []Variable) (Variable, error) {
 	return function(vm, vars...), nil
 }
 
+// getDefinedFunction method is a small helper method to get the defined function.
+// If found it returns the inbuilt and true, else nil and false.
 func (vm *VM) getDefinedFunction(fnName string) (Defined, bool) {
 	fn, found := vm.LFuncs[fnName]
 	return fn, found
 }
 
-func isVariate(str string) bool {
-	if len(str) > 4 && str[:3] == "..." && str[3] != '.' {
-		return true
-	}
-	return false
-}
-
+// runDefinedFunction method is a helper method used to run a passed defined function with passed vars
 func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variable) (Variable, error) {
 	if len(vars) < len(function.scopevars)-1 {
 		return ligoNil, LigoError(fmt.Sprintf("Expected %d arguments, got %d for the %s function",
@@ -372,6 +392,7 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 	return nvm.Eval(function.eval)
 }
 
+// run is the method used to call the functions (defined or in-built) with the arguments
 func (vm *VM) run(tkns []string) (Variable, error) {
 	vars := make([]Variable, 0)
 	fnName := tkns[0]
@@ -415,6 +436,7 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 	return vm.runDefinedFunction(function, fnName, vars)
 }
 
+// runLoop method is used to run the "loop" construct
 func (vm *VM) runLoop(tkns []string) (Variable, error) {
 	if len(tkns) != 3 {
 		return ligoNil, LigoError("Illegal loop construct. Can take 3 arguments only.")
@@ -444,6 +466,7 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 	return ligoNil, err
 }
 
+// runIn method is used to run the "in" construct
 func (vm *VM) runIn(tkns []string) (Variable, error) {
 	if len(tkns) != 4 {
 		return ligoNil, LigoError("Illegal in loop construct. Can take 4 arguments only.")
@@ -486,6 +509,10 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// ifClause is used to evaluate the "if" / "if...else" clause
+// The if or else clause can be another subexp or can be just a variable.
+// This variable is returned and can be passed directly to functions.
+// See the samples/basic.lg file for more details.
 func (vm *VM) ifClause(tkns []string) (Variable, error) {
 	if len(tkns) > 4 || len(tkns) < 3 {
 		return ligoNil, LigoError("Illegal if construct. Can take 3 or 4 arguments.")
@@ -524,6 +551,7 @@ func (vm *VM) ifClause(tkns []string) (Variable, error) {
 	return vm.Eval(successClause)
 }
 
+// returnArg method is used to return a variable or a value.
 func (vm *VM) returnArg(tkns []string) (Variable, error) {
 	if len(tkns) != 2 {
 		panic("Cannot return more than 2 values. (Atleast for now.)")
@@ -531,6 +559,7 @@ func (vm *VM) returnArg(tkns []string) (Variable, error) {
 	return vm.GetVariable(tkns[1])
 }
 
+// deleteVar method is used to delete a variable from the VM
 func (vm *VM) deleteVar(tkns []string) (Variable, error) {
 	if len(tkns) < 2 {
 		return Variable{Type: TYPE_Bool, Value: false}, LigoError("nothing passed to delete")
@@ -545,6 +574,7 @@ func (vm *VM) deleteVar(tkns []string) (Variable, error) {
 	return Variable{Type: TYPE_Bool, Value: true}, nil
 }
 
+// fork method is used to run the passed sub-expression in a separate go-routine
 func (vm *VM) fork(tkns []string) (Variable, error) {
 	if len(tkns) != 2 {
 		return ligoNil, LigoError("Expected one expression, got " + fmt.Sprint(len(tkns)) + " arguments")
@@ -553,6 +583,9 @@ func (vm *VM) fork(tkns []string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// runExpressions method is used to run the passed sub-expressions
+// Generally this is used inside a loop, function or condition clauses
+// as then can only take one sub-expression for execution.
 func (vm *VM) runExpressions(tkns []string) (Variable, error) {
 	v := ligoNil
 	for i, val := range tkns {
@@ -570,6 +603,8 @@ func (vm *VM) runExpressions(tkns []string) (Variable, error) {
 	return v, nil
 }
 
+// evalString method is used to evaluate a passed string as a ligo expression and
+// pass back it's return
 func (vm *VM) evalString(tkns []string) (Variable, error) {
 	if len(tkns) != 2 {
 		return ligoNil, LigoError("'eval' keyword only accepts 1 argument")
@@ -611,6 +646,8 @@ func (vm *VM) evalString(tkns []string) (Variable, error) {
 	return retVal, nil
 }
 
+// Eval method is used to parse a passed string and evaluate it.
+// This is the entry point for any proper execution.
 func (vm *VM) Eval(stmt string) (Variable, error) {
 	stmt = strings.TrimSpace(stmt)
 	if len(stmt) < 2 {
@@ -657,6 +694,7 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// Clone method is used to clone the VM and return the clone one.
 func (vm *VM) Clone() *VM {
 	nvm := NewVM()
 	for key, value := range vm.Funcs {
@@ -671,6 +709,9 @@ func (vm *VM) Clone() *VM {
 	return nvm
 }
 
+// NewScope method is used to create a new vm with global scope set from the
+// current VM.
+// (if the current vm is the parent vm, then it is set as the global, else the global of the current vm is set )
 func (vm *VM) NewScope() *VM {
 	nvm := NewVM()
 	if vm.global == nil {
@@ -681,7 +722,8 @@ func (vm *VM) NewScope() *VM {
 	return nvm
 }
 
-func (vm *VM) LoadFile(input io.Reader) error {
+// LoadReader method is used to load script from a io.Reader and evaluate it
+func (vm *VM) LoadReader(input io.Reader) error {
 	ltxtb, err := ioutil.ReadAll(input)
 	if err != nil {
 		return err

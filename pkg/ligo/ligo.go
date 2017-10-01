@@ -84,10 +84,8 @@ func (v Variable) GetTypeString() (tp string) {
 		tp = "nil"
 	case TypeDFunc, TypeIFunc:
 		tp = "func"
-	case TypeMonoTypeArray:
-		tp = "array<mono type>"
-	case TypePolyTypeArray:
-		tp = "array<poly type>"
+	case TypeArray:
+		tp = "array"
 	case TypeMap:
 		tp = "map"
 	}
@@ -106,10 +104,8 @@ func (v Variable) String() string {
 		typeString += "String"
 	case TypeBool:
 		typeString += "Boolean"
-	case TypeMonoTypeArray:
-		typeString += "Array<MonoType>"
-	case TypePolyTypeArray:
-		typeString += "Array<PolyType>"
+	case TypeArray:
+		typeString += "Array"
 	case TypeNil:
 		typeString += "Nil"
 	}
@@ -161,26 +157,15 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 		if err != nil {
 			return ligoNil, err
 		}
-		var tp Type
 		vars := make([]Variable, 0)
-		for i, val := range tkns {
+		for _, val := range tkns {
 			v, err := vm.GetVariable(val)
 			if err != nil {
 				return ligoNil, err
 			}
 			vars = append(vars, v)
-			if i == 0 {
-				tp = v.Type
-				continue
-			}
-			if tp != v.Type {
-				tp = TypePolyTypeArray
-			}
 		}
-		if tp != TypePolyTypeArray {
-			tp = TypeMonoTypeArray | tp
-		}
-		retVars := Variable{Type: tp, Value: vars}
+		retVars := Variable{Type: TypeArray, Value: vars}
 		return retVars, nil
 	case rExpression.MatchString(token) || MatchChars(token, 0, '(', ')') > 0:
 		var err error
@@ -382,7 +367,7 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 				}
 				val = val[3:]
 				if len(vars) >= i+1 {
-					nvm.Vars[val] = Variable{TypeMonoTypeArray, vars[i:]}
+					nvm.Vars[val] = Variable{TypeArray, vars[i:]}
 				}
 				break
 			}
@@ -403,7 +388,7 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 			if err != nil {
 				return ligoNil, err
 			}
-			if v.Type == TypeMonoTypeArray || v.Type == TypePolyTypeArray {
+			if v.Type == TypeArray {
 				vars = append(vars, v.Value.([]Variable)...)
 				continue
 			}
@@ -479,7 +464,7 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		return ligoNil, err
 	}
 
-	if array.Type != TypeString && array.Type != TypePolyTypeArray && array.Type != TypeMonoTypeArray {
+	if array.Type != TypeString && array.Type != TypeArray {
 		return ligoNil, Error("in : can only iterate thorugh arrays or strings")
 	}
 

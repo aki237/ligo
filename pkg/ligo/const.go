@@ -21,8 +21,7 @@ const (
 	TypeIFunc           Type = 0x005
 	TypeDFunc           Type = 0x006
 	TypeExp             Type = 0x007
-	TypeMonoTypeArray   Type = 0x100
-	TypePolyTypeArray   Type = 0x200
+	TypeArray           Type = 0x100
 	TypeMap             Type = 0x300
 	TypeReader          Type = 0x400
 	TypeWriter          Type = 0x500

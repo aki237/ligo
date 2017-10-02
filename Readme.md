@@ -33,7 +33,7 @@ ligo!!
   This is a scheme like but little different in syntax.
 + **So it is not scheme?**
 
-  Don't worry it has all the paranthesis goodness of scheme.
+  Don't worry it has all the parenthesis goodness of scheme.
 + **How different?**
 
   This is scheme :

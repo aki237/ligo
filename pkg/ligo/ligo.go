@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 // escape sequences to be replaced with the counterpart in a string
@@ -121,6 +122,15 @@ type Defined struct {
 // InBuilt type is a function format that is callable from the ligo script
 type InBuilt func(*VM, ...Variable) Variable
 
+// ProcessCommon is a struct type for process control and signal dispatch
+type ProcessCommon struct {
+	interrupt bool
+	*sync.Mutex
+}
+
+// default ProcessCommon
+var pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
+
 // VM struct is a State Struct contains all the variable maps,
 // defined function maps, in-built function maps and a global
 // scope pointing to the global Scope VM
@@ -129,6 +139,7 @@ type VM struct {
 	Vars   map[string]Variable
 	Funcs  map[string]InBuilt
 	LFuncs map[string]Defined
+	pc     *ProcessCommon
 }
 
 // NewVM returns a new VM object pointer after initializing the values
@@ -138,7 +149,24 @@ func NewVM() *VM {
 	vm.Funcs = make(map[string]InBuilt, 0)
 	vm.LFuncs = make(map[string]Defined, 0)
 	vm.global = nil
+	vm.pc = pc
 	return vm
+}
+
+// Stop method is used to stop the current process and return an error value.
+func (vm *VM) Stop() {
+	vm.pc.Lock()
+	vm.pc.interrupt = true
+}
+
+// Resume method is used to resume the normal evaluation by releasing the lock
+// on the mutex of the process control. This should never be called in this package
+// itself. Resume should be used only when a error returned is ErrSignalRecieved
+// in the main package. See the sample interpreter implementation in
+// https://github.com/aki237/ligo/tree/master/cmd/ligo.
+func (vm *VM) Resume() {
+	vm.pc.Unlock()
+	vm.pc.interrupt = false
 }
 
 // GetVariable method is used to process the token string passed and get the
@@ -436,6 +464,9 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 		return ligoNil, Error("Expected boolean return from the expression : " + condition)
 	}
 	for result.Value.(bool) {
+		if vm.pc.interrupt {
+			return ligoNil, ErrSignalRecieved
+		}
 		_, err := vm.Eval(runExp)
 		if err != nil {
 			return ligoNil, err
@@ -634,6 +665,9 @@ func (vm *VM) evalString(tkns []string) (Variable, error) {
 // Eval method is used to parse a passed string and evaluate it.
 // This is the entry point for any proper execution.
 func (vm *VM) Eval(stmt string) (Variable, error) {
+	if vm.pc.interrupt {
+		return ligoNil, ErrSignalRecieved
+	}
 	stmt = strings.TrimSpace(stmt)
 	if len(stmt) < 2 {
 		return ligoNil, Error("Expected atleast (), got : " + stmt)

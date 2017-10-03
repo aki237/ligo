@@ -4,26 +4,19 @@
 + No documentation
 + Just a single example to demonstrate the working.
 
-## Try it?
+## Building
 
-This is just a package.
+Build the interpreter first. This builds the main package automatically.
 
 ```shell
-$ go get -u github.com/aki237/ligo
+go install github.com/aki237/ligo/cmd/ligo/
 ```
 
-To try the interpreter :
-```shell
-$ cd $GOPATH/src/github.com/aki237/ligo/example/interpreter/
-$ go build
-$ ./interpreter sample/main.lg
-Hello,
-world!
-This
-is
-hello
-from
-ligo!!
+Now without the packages the interpreter is not functional at all.
+This builds some basic dl packages and copies them to the ligo package search directory. (`$HOME/ligo/`)
+```go
+cd $GOPATH/github.com/aki237/ligo/packages/
+./build.sh
 ```
 
 ## FAQ

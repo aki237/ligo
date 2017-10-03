@@ -122,6 +122,9 @@ type Defined struct {
 // InBuilt type is a function format that is callable from the ligo script
 type InBuilt func(*VM, ...Variable) Variable
 
+// Map type is a ligo equivalent for dictionaly or hash maps
+type Map map[Variable]Variable
+
 // ProcessCommon is a struct type for process control and signal dispatch
 type ProcessCommon struct {
 	interrupt bool
@@ -495,12 +498,13 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		return ligoNil, err
 	}
 
-	if array.Type != TypeString && array.Type != TypeArray {
-		return ligoNil, Error("in : can only iterate thorugh arrays or strings")
+	if array.Type != TypeString && array.Type != TypeArray && array.Type != TypeMap {
+		return ligoNil, Error("in : can only iterate thorugh arrays, strings or maps")
 	}
 
 	nvm := vm.NewScope()
-	if array.Type == TypeString {
+	switch array.Type {
+	case TypeString:
 		for _, val := range array.Value.(string) {
 			nvm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
 			_, err = nvm.Eval(runExp)
@@ -508,9 +512,17 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 				return ligoNil, err
 			}
 		}
-	} else {
+	case TypeArray:
 		for _, val := range array.Value.([]Variable) {
 			nvm.Vars[iterVar] = val
+			_, err = nvm.Eval(runExp)
+			if err != nil {
+				return ligoNil, err
+			}
+		}
+	case TypeMap:
+		for key := range array.Value.(Map) {
+			nvm.Vars[iterVar] = key
 			_, err = nvm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err

@@ -66,7 +66,7 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 		return nil
 	}
 	home := os.Getenv("HOME")
-	dir := filepath.Join(home, "lispace", "lib", packageName)
+	dir := filepath.Join(home, "ligo", "lib", packageName)
 	if !exists(dir) {
 		return ligo.Error("Package \"" + packageName + "\" not found in the system")
 	}

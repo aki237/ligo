@@ -499,28 +499,23 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		return ligoNil, Error("in : can only iterate thorugh arrays or strings")
 	}
 
-	v, ok := vm.Vars[iterVar]
+	nvm := vm.NewScope()
 	if array.Type == TypeString {
 		for _, val := range array.Value.(string) {
-			vm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
-			_, err = vm.Eval(runExp)
+			nvm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
+			_, err = nvm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err
 			}
 		}
 	} else {
 		for _, val := range array.Value.([]Variable) {
-			vm.Vars[iterVar] = val
-			_, err = vm.Eval(runExp)
+			nvm.Vars[iterVar] = val
+			_, err = nvm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err
 			}
 		}
-	}
-	if ok {
-		vm.Vars[iterVar] = v
-	} else {
-		delete(vm.Vars, iterVar)
 	}
 	return ligoNil, nil
 }

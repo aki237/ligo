@@ -1,0 +1,6 @@
+;;; base
+;;; This is the file where the documentation of the given package is written
+
+(fn printf |format ...rest|
+    (progn
+      (print (sprintf format ...rest))))

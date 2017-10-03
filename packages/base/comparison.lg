@@ -1,0 +1,12 @@
+;; != function returns a boolean, true when passed 2 quantities are not equal and false when equal
+(fn != |q1 q2|
+    (if (== q1 q2)
+        false
+      true))
+
+;; < function returns a boolean, true when q1 is less than q2 and vice-versa
+(fn < |q1 q2|
+    (progn
+      (if (== q1 q2)
+          (return false)
+      (not (> q1 q2)))))

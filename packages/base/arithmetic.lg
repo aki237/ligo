@@ -1,0 +1,15 @@
+;; - function subtracts the 2 quantities passed
+(fn - |a b|
+    (+ a (* b -1)))
+
+;; / function divides the 2 quantities passed
+(fn / |a b|
+    (* a (reciprocal b)))
+
+;; ++ function increments a passed value by 1 and returns it
+(fn ++ |a|
+    (+ a 1))
+
+;; -- function decrements a passed value by 1 and returns it
+(fn -- |a|
+    (- a 1))

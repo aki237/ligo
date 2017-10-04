@@ -50,6 +50,7 @@ func runInteractive(vm *ligo.VM) {
 			break
 		}
 
+		part = ligo.StripComments(part)
 		part = strings.TrimSpace(part)
 
 		if part == "" {

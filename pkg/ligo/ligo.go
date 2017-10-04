@@ -131,9 +131,6 @@ type ProcessCommon struct {
 	*sync.Mutex
 }
 
-// default ProcessCommon
-var pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
-
 // VM struct is a State Struct contains all the variable maps,
 // defined function maps, in-built function maps and a global
 // scope pointing to the global Scope VM
@@ -152,7 +149,7 @@ func NewVM() *VM {
 	vm.Funcs = make(map[string]InBuilt, 0)
 	vm.LFuncs = make(map[string]Defined, 0)
 	vm.global = nil
-	vm.pc = pc
+	vm.pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
 	return vm
 }
 
@@ -743,6 +740,7 @@ func (vm *VM) NewScope() *VM {
 	} else {
 		nvm.global = vm.global
 	}
+	nvm.pc = vm.pc
 	return nvm
 }
 

@@ -14,5 +14,9 @@ func main() {
 		runInteractive(vm)
 		return
 	}
+	if len(os.Args) == 2 && os.Args[1] == "--web" {
+		runWeb()
+		return
+	}
 	runFile(vm)
 }

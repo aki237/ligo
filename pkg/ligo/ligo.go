@@ -484,6 +484,7 @@ func (vm *VM) runLoop(tkns []string) (Variable, error) {
 
 // runIn method is used to run the "in" construct
 func (vm *VM) runIn(tkns []string) (Variable, error) {
+
 	if len(tkns) != 4 {
 		return ligoNil, Error("Illegal in loop construct. Can take 4 arguments only.")
 	}
@@ -495,36 +496,32 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		return ligoNil, err
 	}
 
-	if array.Type != TypeString && array.Type != TypeArray && array.Type != TypeMap {
-		return ligoNil, Error("in : can only iterate thorugh arrays, strings or maps")
+	if array.Type != TypeString && array.Type != TypeArray {
+		return ligoNil, Error("in : can only iterate thorugh arrays or strings")
 	}
 
-	nvm := vm.NewScope()
-	switch array.Type {
-	case TypeString:
+	v, ok := vm.Vars[iterVar]
+	if array.Type == TypeString {
 		for _, val := range array.Value.(string) {
-			nvm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
-			_, err = nvm.Eval(runExp)
+			vm.Vars[iterVar] = Variable{Type: TypeString, Value: string(val)}
+			_, err = vm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err
 			}
 		}
-	case TypeArray:
+	} else {
 		for _, val := range array.Value.([]Variable) {
-			nvm.Vars[iterVar] = val
-			_, err = nvm.Eval(runExp)
+			vm.Vars[iterVar] = val
+			_, err = vm.Eval(runExp)
 			if err != nil {
 				return ligoNil, err
 			}
 		}
-	case TypeMap:
-		for key := range array.Value.(Map) {
-			nvm.Vars[iterVar] = key
-			_, err = nvm.Eval(runExp)
-			if err != nil {
-				return ligoNil, err
-			}
-		}
+	}
+	if ok {
+		vm.Vars[iterVar] = v
+	} else {
+		delete(vm.Vars, iterVar)
 	}
 	return ligoNil, nil
 }

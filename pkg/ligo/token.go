@@ -44,7 +44,7 @@ func ScanTokens(ltxt string) ([]string, error) {
 		)
 	}
 	if ltxt[len(ltxt)-1] != ')' {
-		return nil, Error("Expected ')' at the start of the expression, got : " + string(ltxt[0]))
+		return nil, Error("Expected ')' at the end of the expression, got : " + string(ltxt[0]))
 	}
 	inQuotes := false
 	inSBkts := false

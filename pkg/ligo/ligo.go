@@ -747,7 +747,25 @@ func (vm *VM) LoadReader(input io.Reader) error {
 	if err != nil {
 		return err
 	}
-	ltxt := StripComments(string(ltxtb))
+
+	exps, err := vm.BreakChunk(string(ltxtb))
+	if err != nil {
+		return err
+	}
+
+	for _, val := range exps {
+		_, err := vm.Eval(val)
+		if err != nil {
+			return fmt.Errorf("error : %s", err)
+		}
+	}
+
+	return nil
+}
+
+// BreakChunk is used to break a chunk of ligo code into string list of subexps
+func (vm VM) BreakChunk(ltxt string) ([]string, error) {
+	ltxt = StripComments(ltxt)
 	exps := make([]string, 0)
 	line := 0
 	inComment := false
@@ -760,7 +778,7 @@ func (vm *VM) LoadReader(input io.Reader) error {
 			}
 			off := MatchChars(ltxt, int64(i), '(', ')') + 1
 			if off < int64(i) {
-				return fmt.Errorf("Syntax error near %d:%d : %s", i, line, ltxt[i:])
+				return nil, fmt.Errorf("Syntax error near %d:%d : %s", i, line, ltxt[i:])
 			}
 			exps = append(exps, ltxt[i:off])
 			i = int(off) - 1
@@ -776,16 +794,8 @@ func (vm *VM) LoadReader(input io.Reader) error {
 			if inComment {
 				continue
 			}
-			return fmt.Errorf("unexpected Character at line %d : %s", line, ch)
+			return nil, fmt.Errorf("unexpected Character at line %d : %s", line, ch)
 		}
 	}
-
-	for _, val := range exps {
-		_, err := vm.Eval(val)
-		if err != nil {
-			return fmt.Errorf("error : %s", err)
-		}
-	}
-
-	return nil
+	return exps, nil
 }

@@ -1,5 +1,7 @@
 # ligo - scheme like language interpreter in golang
 
+[![Join the chat at https://gitter.im/hackingligo/Lobby](https://badges.gitter.im/hackingligo/Lobby.svg)](https://gitter.im/hackingligo/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 + This is just a hobby project.
 + No documentation
 + Just a single example to demonstrate the working.

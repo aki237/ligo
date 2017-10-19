@@ -12,8 +12,35 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["file-open"] = vmFileOpen   // (file-open "filename.txt" "rw") => file handler   | panics
 	vm.Funcs["file-read"] = vmFileRead   // (file-read fh nchars)           => string         | panics
 	vm.Funcs["file-close"] = vmFileClose // (file-close fh)                 => nil            | error
-	//vm.Funcs["file-seek"] = vmFileOpen  // (file-seek fh amt from)         => nil            | panics
+	vm.Funcs["file-seek"] = vmFileSeek   // (file-seek fh amt from)         => current offset | panics
 	vm.Funcs["file-write"] = vmFileWrite // (file-write fh string)          => written amount | panics
+}
+
+func vmFileSeek(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 3 {
+		panic("file-seek : expected 3 arguments exactly")
+	}
+	if a[0].Type != 0x10080 {
+		panic("file-seek : not a valid file handler")
+	}
+
+	if a[1].Type != ligo.TypeInt {
+		panic("file-seek : position should be an integer")
+	}
+
+	if a[2].Type != ligo.TypeInt {
+		panic("file-seek : whence should be an integer")
+	}
+	fh := a[0].Value.(*os.File)
+	pos := a[1].Value.(int64)
+	whence := a[2].Value.(int64)
+
+	offset, err := fh.Seek(pos, int(whence))
+	if err != nil {
+		panic("Error while seeking : " + err.Error())
+	}
+
+	return ligo.Variable{Type: ligo.TypeInt, Value: offset}
 }
 
 func vmFileClose(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

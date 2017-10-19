@@ -33,7 +33,8 @@ cd $GOPATH/github.com/aki237/ligo/packages/
 
   This is scheme :
   ```scheme
-  (define sum(lambda (x y)
+  (define sum 
+    (lambda (x y) 
       (+ x y)))
   ```
   This is ligo :

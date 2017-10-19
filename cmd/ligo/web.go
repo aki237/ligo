@@ -32,15 +32,20 @@ func serve(conn *websocket.Conn, vm *ligo.VM) {
 	}()
 
 	for {
-		_, mess, err := conn.ReadMessage()
+		tp, mess, err := conn.ReadMessage()
+		fmt.Println(tp)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 		part := strings.TrimSpace(ligo.StripComments(string(mess)))
+		fmt.Printf("Message recieved : %v\n", []byte(part))
 		message := ""
 		v, err := vm.Eval(part)
 		message = fmt.Sprint(v.Value)
+		if v.Value == nil {
+			message = "<i class=\"nilReturn\">nil</i>"
+		}
 		if err != nil {
 			message = "<b class=\"error\">" + err.Error() + "</b>"
 		}
@@ -49,7 +54,6 @@ func serve(conn *websocket.Conn, vm *ligo.VM) {
 			log.Println(err)
 			return
 		}
-		fmt.Println("Message got : ", part, ", Message wrote : ", message)
 	}
 }
 

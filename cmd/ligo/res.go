@@ -12,7 +12,9 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 		margin: 0px;
 		background-color: #222222;
 	}
-
+	.nilReturn {
+		color : #555555;
+	}
         .error {
                 color : #F30000;
         }
@@ -24,18 +26,23 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 		background-color: #888888;
 		overflow-y : auto;
 	}
+
 	#interp {
+		resize: both;
+		width : 98%;
+		box-shadow : none;
+		border : none;
 		min-height: 35px;
 		font-size: 30px;
 		color : #FFFFFF;
-		padding-left: 10px;
+		padding: 1%;
 		font-family: monospace;
-		margin : 5px;
 		margin-top : 10px;
 		text-align: left;
 		background-color: #111111;
 	}
 	.interpDone {
+		border-radius: 3px;
 		min-height: 4%;
 		font-size: 30px;
 		color : #777777;
@@ -46,6 +53,7 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 		background-color: #333333;	
 	}
 	.result {
+		border-radius: 3px;
 		min-height: 4%;
 		font-size: 30px;
 		color : #333333;
@@ -103,8 +111,8 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 		};
 		function readInput(el, e) {
 			if (e.keyCode == 13  && e.ctrlKey) {
-				vm.write(el.textContent);
-				el.textContent = "";
+				vm.write(el.innerText);
+				el.innerText = "";
 			}
 		}
 	</script>

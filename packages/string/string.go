@@ -7,6 +7,7 @@ import (
 	"github.com/aki237/ligo/pkg/ligo"
 )
 
+// PluginInit function is the plugin initializer for the string package
 func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-indexOf"] = vmStringIndexOf
 	vm.Funcs["string-replace"] = vmStringReplace

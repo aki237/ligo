@@ -7,11 +7,12 @@ import (
 	"github.com/aki237/ligo/pkg/ligo"
 )
 
+// PluginInit function is the plugin initializer for the url package
 func PluginInit(vm *ligo.VM) {
-	vm.Funcs["url-get"] = URLGet
+	vm.Funcs["url-get"] = vmURLGet
 }
 
-func URLGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+func vmURLGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
 		panic("urlget expects atleast 1 variable")
 	}

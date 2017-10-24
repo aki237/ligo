@@ -15,6 +15,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-lowerCase"] = vmStringLowerCase
 	vm.Funcs["string-upperCase"] = vmStringUpperCase
 	vm.Funcs["string-fromArray"] = vmStringFromArray
+	vm.Funcs["string-repeat"] = vmStringRepeat
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -147,6 +148,25 @@ func vmStringSplit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		panic(fmt.Sprintf("string-repeat : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeInt {
+		panic(fmt.Sprintf("string-repeat : should take 2 arguments of type (string, int), got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+	}
+
+	str := a[0].Value.(string)
+	repetitions := a[1].Value.(int)
+
+	if repetitions < 0 {
+		panic(fmt.Sprintf("string-repeat : second argument should be a positive integer, got %d.", repetitions))
+	}
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, repetitions)}
 }
 
 func main() {

@@ -1,8 +1,8 @@
-# Using ligo as a extention languages to packages
+# Using ligo as a extension languages to packages
 
 The ligo library can be used to extend golang's power using the scripting functionality.
-This tutorial says how to use ligo as a extention language easily. If you have read the [introduction](0_Introduction.md)
-this won't be necessary because you'll have the idea how to use ligo as a extention utility.
+This tutorial says how to use ligo as a extension language easily. If you have read the [introduction](0_Introduction.md)
+this won't be necessary because you'll have the idea how to use ligo as a extension utility.
 
 ```go
 package main

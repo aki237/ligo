@@ -39,7 +39,7 @@ func serve(conn *websocket.Conn, vm *ligo.VM) {
 			return
 		}
 		part := strings.TrimSpace(ligo.StripComments(string(mess)))
-		fmt.Printf("Message recieved : %v\n", []byte(part))
+		fmt.Printf("Message received : %v\n", []byte(part))
 		message := ""
 		v, err := vm.Eval(part)
 		message = fmt.Sprint(v.Value)

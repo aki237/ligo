@@ -8,6 +8,7 @@ import (
 	"github.com/aki237/ligo/pkg/ligo"
 )
 
+// PluginInit function is the plugin initializer for the file package
 func PluginInit(vm *ligo.VM) {
 	vm.Funcs["file-open"] = vmFileOpen   // (file-open "filename.txt" "rw") => file handler   | panics
 	vm.Funcs["file-read"] = vmFileRead   // (file-read fh nchars)           => string         | panics

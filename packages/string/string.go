@@ -7,6 +7,7 @@ import (
 	"github.com/aki237/ligo/pkg/ligo"
 )
 
+// PluginInit function is the plugin initializer for the string package
 func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-indexOf"] = vmStringIndexOf
 	vm.Funcs["string-replace"] = vmStringReplace
@@ -16,6 +17,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-upperCase"] = vmStringUpperCase
 	vm.Funcs["string-fromArray"] = vmStringFromArray
 	vm.Funcs["string-compare"] = vmStringCompare
+	vm.Funcs["string-repeat"] = vmStringRepeat
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -163,6 +165,25 @@ func vmStringCompare(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	str2 := a[1].Value.(string)
 
 	return ligo.Variable{Type: ligo.TypeInt, Value: strings.Compare(str1, str2)}
+}
+
+func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		panic(fmt.Sprintf("string-repeat : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeInt {
+		panic(fmt.Sprintf("string-repeat : should take 2 arguments of type (string, int), got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+	}
+
+	str := a[0].Value.(string)
+	repetitions := a[1].Value.(int)
+
+	if repetitions < 0 {
+		panic(fmt.Sprintf("string-repeat : second argument should be a positive integer, got %d.", repetitions))
+	}
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, repetitions)}
 }
 
 func main() {

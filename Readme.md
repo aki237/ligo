@@ -42,3 +42,6 @@ cd $GOPATH/github.com/aki237/ligo/packages/
   (fn sum |x y|
       (+ x y))
   ```
+
+## Contributing
+Please refer [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

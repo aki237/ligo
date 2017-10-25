@@ -14,8 +14,8 @@
     ```
     The long description is optional, but should be a list of changes done. 
     There is a blank line separating the body and the Issue Reference line.
-  - Possibly try to do the commits in the order of dependancy. Say a newly added function is needed by a `file1`
+  - Possibly try to do the commits in the order of dependency. Say a newly added function is needed by a `file1`
     which is in `file2`, always commit `file2` first and then `file1`.
   - If the above is not possible, say changes in every file is associated with a single feature, the feature should be added in
     the short description, followed by description of changes in each file.
-+ `lint`, `fmt`, `vet`, `ineffassign`, `gocyclo`, `mispell` the code you wrote.
++ `lint`, `fmt`, `vet`, `ineffassign`, `gocyclo`, `misspell` the code you wrote.

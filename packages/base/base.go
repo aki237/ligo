@@ -12,6 +12,7 @@ import (
 	"github.com/aki237/ligo/pkg/ligo"
 )
 
+// PluginInit function is the plugin initializer for the base package
 func PluginInit(vm *ligo.VM) {
 	vm.Funcs["println"] = vmPrintln
 	vm.Funcs["vmmem"] = vmMem
@@ -366,14 +367,14 @@ func loadFile(fileName string, vm *ligo.VM) error {
 			if inComment {
 				continue
 			}
-			return fmt.Errorf("Unexpected Character at line %d : %s\n", line, ch)
+			return fmt.Errorf("unexpected Character at line %d : %s", line, ch)
 		}
 	}
 
 	for _, val := range exps {
 		_, err := vm.Eval(val)
 		if err != nil {
-			return fmt.Errorf("Error : %s\n", err)
+			return fmt.Errorf("error : %s", err)
 		}
 	}
 
@@ -556,8 +557,8 @@ func vmPanic(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	number := false
 	tp := ligo.TypeInt
-	var sums string = ""
-	var sumf float64 = 0
+	sums := ""
+	sumf := float64(0)
 	for i, val := range a {
 		if val.Type != ligo.TypeInt && val.Type != ligo.TypeFloat && val.Type != ligo.TypeString {
 			panic("Cannot add a variable of type that is not String, Int or a Float.")

@@ -82,7 +82,7 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 		class VMWS {
 			constructor() {
 				this.ws = new WebSocket(url("ws"));
-				this.ws.onmessage = this.recieve;
+				this.ws.onmessage = this.receive;
 			}
 
 			write(subexp) {
@@ -96,7 +96,7 @@ var htmlPage = `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="e
 				}
 			}
 
-			recieve(message) {
+			receive(message) {
 				var histRes = document.createElement("div");
 				histRes.className += " result";
 				histRes.innerHTML = message.data;

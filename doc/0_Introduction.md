@@ -9,9 +9,9 @@ function to greet any name (string type).
 When a `(require "somePackage")` is called in ligo, the interpreter searches
 for this directory in the ligo package search package (ie., `$HOME/lib/somePackage`).
 Say your package contains a go compiled plugin, the compiled file should be stored in
-that directory with some name and `.plg` extention. If your package contains simple
+that directory with some name and `.plg` extension. If your package contains simple
 ligo source files, the files should be placed in the same directory with `.lg`
-extention.
+extension.
 
 When the interpreter loads files from the package directory, if it encounters a `.plg`
 file, it `dlopen`s the file and loads the symbol `PluginInit` (which is a function) and
@@ -53,7 +53,7 @@ func greet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
         // either panic or do something...
     }
 
-    // convertion
+    // conversion
     name := a[0].Value.(string)
 
     // Print the greeting.
@@ -105,7 +105,7 @@ func greet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
         // either panic or do something...
     }
 
-    // convertion
+    // conversion
     name := a[0].Value.(string)
 
     // Print the greeting.

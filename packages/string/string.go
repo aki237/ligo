@@ -16,6 +16,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-lowerCase"] = vmStringLowerCase
 	vm.Funcs["string-upperCase"] = vmStringUpperCase
 	vm.Funcs["string-fromArray"] = vmStringFromArray
+	vm.Funcs["string-hasPrefix"] = vmStringHasPrefix
 	vm.Funcs["string-hasSuffix"] = vmStringHasSuffix
 	vm.Funcs["string-compare"] = vmStringCompare
 	vm.Funcs["string-repeat"] = vmStringRepeat
@@ -151,6 +152,21 @@ func vmStringSplit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringHasPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		panic(fmt.Sprintf("string-hasPrefix : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		panic(fmt.Sprintf("string-hasPrefix : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+	}
+
+	str := a[0].Value.(string)
+	prefix := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeBool, Value: strings.HasPrefix(str, prefix)}
 }
 
 func vmStringHasSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

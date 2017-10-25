@@ -16,6 +16,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-lowerCase"] = vmStringLowerCase
 	vm.Funcs["string-upperCase"] = vmStringUpperCase
 	vm.Funcs["string-fromArray"] = vmStringFromArray
+	vm.Funcs["string-compare"] = vmStringCompare
 	vm.Funcs["string-repeat"] = vmStringRepeat
 }
 
@@ -149,6 +150,21 @@ func vmStringSplit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringCompare(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		panic(fmt.Sprintf("string-compare : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		panic(fmt.Sprintf("string-compare : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+	}
+
+	str1 := a[0].Value.(string)
+	str2 := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeInt, Value: strings.Compare(str1, str2)}
 }
 
 func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

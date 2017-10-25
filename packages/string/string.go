@@ -209,13 +209,13 @@ func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	str := a[0].Value.(string)
-	repetitions := a[1].Value.(int)
+	repetitions := a[1].Value.(int64)
 
 	if repetitions < 0 {
 		panic(fmt.Sprintf("string-repeat : second argument should be a positive integer, got %d.", repetitions))
 	}
 
-	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, repetitions)}
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, int(repetitions))}
 }
 
 func main() {

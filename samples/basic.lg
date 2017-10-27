@@ -66,3 +66,23 @@
 ;; Deleting the variables from the vm
 (delete sum)
 (delete numbers)
+
+
+;; A new exception handling construct is added to the language
+(var newage 12)
+(if (< newage 18)
+    (throw "Sorry you are not an adult"))
+
+;; Now if you try to run something, it will execute if and only
+;; if a catch is called first
+(catch e (printf "Got an exception : %s\n" e))
+
+;; if you have nothing to do with the exception
+;; just do this
+(throw "Another thrown exception")
+(catch e ())
+
+;; if nothing is thrown, catch doesn't do anything
+;; So it is better to write a catch code for any
+;; function call that can throw
+(catch e (println "This is an exception : " e))

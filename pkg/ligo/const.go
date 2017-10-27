@@ -2,10 +2,11 @@ package ligo
 
 // Error contants
 const (
-	ErrSyntaxError    Error = "Syntax Error"
-	ErrNoVariable     Error = "Variable not found in scope"
-	ErrFuncNotFound   Error = "Function not defined in scope"
-	ErrSignalRecieved Error = "Caught cancellation amidst evaluation"
+	ErrSyntaxError         Error = "Syntax Error"
+	ErrNoVariable          Error = "Variable not found in scope"
+	ErrFuncNotFound        Error = "Function not defined in scope"
+	ErrSignalRecieved      Error = "Caught cancellation amidst evaluation"
+	ErrExceptionNotHandled Error = "Exception not handled"
 )
 
 // Type is a type to denote the type of Variables in the VM

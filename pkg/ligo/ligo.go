@@ -135,11 +135,12 @@ type ProcessCommon struct {
 // defined function maps, in-built function maps and a global
 // scope pointing to the global Scope VM
 type VM struct {
-	global *VM
-	Vars   map[string]Variable
-	Funcs  map[string]InBuilt
-	LFuncs map[string]Defined
-	pc     *ProcessCommon
+	global    *VM
+	exception string
+	Vars      map[string]Variable
+	Funcs     map[string]InBuilt
+	LFuncs    map[string]Defined
+	pc        *ProcessCommon
 }
 
 // NewVM returns a new VM object pointer after initializing the values
@@ -663,6 +664,29 @@ func (vm *VM) evalString(tkns []string) (Variable, error) {
 	return retVal, nil
 }
 
+// catchException method is used to manage the uncaught exception
+func (vm *VM) catchException(tkns []string) (Variable, error) {
+	if len(tkns) != 3 {
+		return ligoNil, Error("catch expects 3 arguments")
+	}
+
+	if vm.exception == "" {
+		return ligoNil, nil
+	}
+
+	scope := vm.Clone()
+
+	scope.Vars[tkns[1]] = Variable{Value: vm.exception, Type: TypeString}
+	vm.exception = ""
+	return scope.Eval(tkns[2])
+}
+
+// Throw method is used to throw an exception in the VM.
+func (vm *VM) Throw(exception string) Variable {
+	vm.exception = exception
+	return ligoNil
+}
+
 // Eval method is used to parse a passed string and evaluate it.
 // This is the entry point for any proper execution.
 func (vm *VM) Eval(stmt string) (Variable, error) {
@@ -684,6 +708,14 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 		return ligoNil, nil
 	}
 	fnName := tkns[0]
+
+	if vm.exception != "" && fnName != "catch" {
+		return ligoNil, ErrExceptionNotHandled
+	}
+
+	if fnName == "catch" {
+		return vm.catchException(tkns)
+	}
 
 	switch fnName {
 	case "var":

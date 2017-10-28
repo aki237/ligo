@@ -33,6 +33,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-trimSuffix"] = vmStringTrimSuffix
 	vm.Funcs["string-trimLeft"] = vmStringTrimLeft
 	vm.Funcs["string-trimRight"] = vmStringTrimRight
+	vm.Funcs["string-join"] = vmStringJoin
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -485,6 +486,35 @@ func vmStringSplitAfterN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringJoin(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		return vm.Throw(fmt.Sprintf("string-join : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeArray || a[1].Type != ligo.TypeString {
+		return vm.Throw(fmt.Sprintf("string-join : should take 2 arguments of type (array,string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	arrayValues := a[0].Value.([]ligo.Variable)
+	if arrayValues[0].Type != ligo.TypeString {
+		return vm.Throw(fmt.Sprintf("string-join : 1 argument should be an array of string type, got array of (%s) type.",
+			arrayValues[0].GetTypeString(),
+		))
+	}
+
+	var items []string
+	for _, v := range arrayValues {
+		items = append(items, v.Value.(string))
+	}
+
+	sep := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.Join(items, sep)}
 }
 
 func main() {

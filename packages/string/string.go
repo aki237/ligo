@@ -20,6 +20,7 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-hasSuffix"] = vmStringHasSuffix
 	vm.Funcs["string-compare"] = vmStringCompare
 	vm.Funcs["string-repeat"] = vmStringRepeat
+	vm.Funcs["string-count"] = vmStringCount
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -216,6 +217,24 @@ func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, int(repetitions))}
+}
+
+func vmStringCount(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-count : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-count : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	substr := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeInt, Value: strings.Count(str, substr)}
 }
 
 func main() {

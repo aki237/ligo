@@ -12,6 +12,9 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-indexOf"] = vmStringIndexOf
 	vm.Funcs["string-replace"] = vmStringReplace
 	vm.Funcs["string-split"] = vmStringSplit
+	vm.Funcs["string-splitAfter"] = vmStringSplitAfter
+	vm.Funcs["string-splitN"] = vmStringSplitN
+	vm.Funcs["string-splitAfterN"] = vmStringSplitAfterN
 	vm.Funcs["string-trimSpace"] = vmStringTrimSpace
 	vm.Funcs["string-lowerCase"] = vmStringLowerCase
 	vm.Funcs["string-upperCase"] = vmStringUpperCase
@@ -406,6 +409,82 @@ func vmStringTrimRight(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	cutset := a[1].Value.(string)
 
 	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimRight(str, cutset)}
+}
+
+func vmStringSplitAfter(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments of type string, got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	sep := a[1].Value.(string)
+
+	splitted := strings.SplitAfter(str, sep)
+	ret := make([]ligo.Variable, 0)
+	for _, val := range splitted {
+		ret = append(ret, ligo.Variable{Type: ligo.TypeString, Value: val})
+	}
+
+	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringSplitN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 3 {
+		vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString || a[2].Type != ligo.TypeInt {
+		vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+			a[2].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	sep := a[1].Value.(string)
+	n := a[2].Value.(int)
+
+	splitted := strings.SplitN(str, sep, n)
+	ret := make([]ligo.Variable, 0)
+	for _, val := range splitted {
+		ret = append(ret, ligo.Variable{Type: ligo.TypeString, Value: val})
+	}
+
+	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
+}
+
+func vmStringSplitAfterN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 3 {
+		vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString || a[2].Type != ligo.TypeInt {
+		vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+			a[2].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	sep := a[1].Value.(string)
+	n := a[2].Value.(int)
+
+	splitted := strings.SplitAfterN(str, sep, n)
+	ret := make([]ligo.Variable, 0)
+	for _, val := range splitted {
+		ret = append(ret, ligo.Variable{Type: ligo.TypeString, Value: val})
+	}
+
+	return ligo.Variable{Type: ligo.TypeArray, Value: ret}
 }
 
 func main() {

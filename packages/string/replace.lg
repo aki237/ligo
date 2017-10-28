@@ -3,8 +3,3 @@
 (fn string-replaceAll |original old new|
     (string-replace original old new -1)
     )
-
-;; string-count is used to count the number of occurrences of "sub" in the "str"
-(fn string-count |str sub|
-    ()
-    )

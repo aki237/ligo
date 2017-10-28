@@ -243,7 +243,7 @@ func vmStringCount(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	str := a[0].Value.(string)
 	substr := a[1].Value.(string)
 
-	return ligo.Variable{Type: ligo.TypeInt, Value: strings.Count(str, substr)}
+	return ligo.Variable{Type: ligo.TypeInt, Value: int64(strings.Count(str, substr))}
 }
 
 func vmStringContains(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -297,7 +297,7 @@ func vmStringLastIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	str := a[0].Value.(string)
 	substr := a[1].Value.(string)
 
-	return ligo.Variable{Type: ligo.TypeInt, Value: strings.LastIndex(str, substr)}
+	return ligo.Variable{Type: ligo.TypeInt, Value: int64(strings.LastIndex(str, substr))}
 }
 
 func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -315,7 +315,7 @@ func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	str := a[0].Value.(string)
 	substr := a[1].Value.(string)
 
-	return ligo.Variable{Type: ligo.TypeInt, Value: strings.LastIndexAny(str, substr)}
+	return ligo.Variable{Type: ligo.TypeInt, Value: int64(strings.LastIndexAny(str, substr))}
 }
 
 func vmStringTrim(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

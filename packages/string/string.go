@@ -21,6 +21,8 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-compare"] = vmStringCompare
 	vm.Funcs["string-repeat"] = vmStringRepeat
 	vm.Funcs["string-count"] = vmStringCount
+	vm.Funcs["string-contains"] = vmStringContains
+	vm.Funcs["string-containsAny"] = vmStringContainsAny
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -235,6 +237,42 @@ func vmStringCount(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	substr := a[1].Value.(string)
 
 	return ligo.Variable{Type: ligo.TypeInt, Value: strings.Count(str, substr)}
+}
+
+func vmStringContains(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	substr := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeBool, Value: strings.Contains(str, substr)}
+}
+
+func vmStringContainsAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	chars := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeBool, Value: strings.ContainsAny(str, chars)}
 }
 
 func main() {

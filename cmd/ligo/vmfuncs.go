@@ -118,3 +118,9 @@ func slistContains(sl []string, s string) bool {
 	}
 	return false
 }
+
+func vmExit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	vm.Stop()
+	os.Exit(0)
+	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
+}

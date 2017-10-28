@@ -11,6 +11,7 @@ func main() {
 	vm.Funcs["require"] = VMRequire
 	vm.Funcs["load-plugin"] = VMDlLoad
 	if len(os.Args) < 2 {
+		vm.Funcs["exit"] = vmExit
 		runInteractive(vm)
 		return
 	}
@@ -18,5 +19,6 @@ func main() {
 		runWeb()
 		return
 	}
+	vm.Funcs["exit"] = vmExit
 	runFile(vm)
 }

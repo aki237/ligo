@@ -23,6 +23,8 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-count"] = vmStringCount
 	vm.Funcs["string-contains"] = vmStringContains
 	vm.Funcs["string-containsAny"] = vmStringContainsAny
+	vm.Funcs["string-lastIndex"] = vmStringLastIndex
+	vm.Funcs["string-lastIndexAny"] = vmStringLastIndexAny
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -273,6 +275,42 @@ func vmStringContainsAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	chars := a[1].Value.(string)
 
 	return ligo.Variable{Type: ligo.TypeBool, Value: strings.ContainsAny(str, chars)}
+}
+
+func vmStringLastIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	substr := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeInt, Value: strings.LastIndex(str, substr)}
+}
+
+func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	substr := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeInt, Value: strings.LastIndexAny(str, substr)}
 }
 
 func main() {

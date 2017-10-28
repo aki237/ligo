@@ -19,6 +19,7 @@ func runFile(vm *ligo.VM) {
 	go func() {
 		for range c {
 			vm.Stop()
+			os.Exit(0)
 		}
 	}()
 	err = vm.LoadReader(f)

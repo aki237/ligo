@@ -25,6 +25,11 @@ func PluginInit(vm *ligo.VM) {
 	vm.Funcs["string-containsAny"] = vmStringContainsAny
 	vm.Funcs["string-lastIndex"] = vmStringLastIndex
 	vm.Funcs["string-lastIndexAny"] = vmStringLastIndexAny
+	vm.Funcs["string-trim"] = vmStringTrim
+	vm.Funcs["string-trimPrefix"] = vmStringTrimPrefix
+	vm.Funcs["string-trimSuffix"] = vmStringTrimSuffix
+	vm.Funcs["string-trimLeft"] = vmStringTrimLeft
+	vm.Funcs["string-trimRight"] = vmStringTrimRight
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -311,6 +316,96 @@ func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	substr := a[1].Value.(string)
 
 	return ligo.Variable{Type: ligo.TypeInt, Value: strings.LastIndexAny(str, substr)}
+}
+
+func vmStringTrim(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	cutset := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.Trim(str, cutset)}
+}
+
+func vmStringTrimPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	prefix := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimPrefix(str, prefix)}
+}
+
+func vmStringTrimSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	suffix := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimSuffix(str, suffix)}
+}
+
+func vmStringTrimLeft(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	cutset := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimLeft(str, cutset)}
+}
+
+func vmStringTrimRight(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
+	if len(a) != 2 {
+		vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments, got %d.", len(a)))
+	}
+
+	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
+		vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments of type (string, string), got (%s, %s).",
+			a[0].GetTypeString(),
+			a[1].GetTypeString(),
+		))
+	}
+
+	str := a[0].Value.(string)
+	cutset := a[1].Value.(string)
+
+	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimRight(str, cutset)}
 }
 
 func main() {

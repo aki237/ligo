@@ -83,34 +83,22 @@ func (v Variable) GetTypeString() (tp string) {
 		tp = "string"
 	case TypeNil:
 		tp = "nil"
-	case TypeDFunc, TypeIFunc:
-		tp = "func"
 	case TypeArray:
 		tp = "array"
 	case TypeMap:
 		tp = "map"
+	case TypeIFunc:
+		tp = "inbuilt function"
+	case TypeDFunc:
+		tp = "defined function"
 	}
 	return
 }
 
 // String method implements the Stringer interface for the Variable type
 func (v Variable) String() string {
-	typeString := "Variable {Type : "
-	switch v.Type {
-	case TypeInt:
-		typeString += "Integer<64>"
-	case TypeFloat:
-		typeString += "Float<64>"
-	case TypeString:
-		typeString += "String"
-	case TypeBool:
-		typeString += "Boolean"
-	case TypeArray:
-		typeString += "Array"
-	case TypeNil:
-		typeString += "Nil"
-	}
-	return typeString + fmt.Sprint(" ,Value : ", v.Value, "}")
+	typeString := "Variable {Type : <" + v.GetTypeString()
+	return typeString + fmt.Sprint("> ,Value : ", v.Value, "}")
 }
 
 // Defined struct contains variables needed for storing a function defined in ligo script itself
@@ -360,6 +348,11 @@ func (vm *VM) runInBuiltFunction(function InBuilt, vars []Variable) (Variable, e
 func (vm *VM) getDefinedFunction(fnName string) (Defined, bool) {
 	fn, found := vm.LFuncs[fnName]
 	return fn, found
+}
+
+// RunDefined method is an outlet of the runDefinedFunction function
+func (vm *VM) RunDefined(function Defined, vars []Variable) (Variable, error) {
+	return vm.runDefinedFunction(function, "<defined function call>", vars)
 }
 
 // runDefinedFunction method is a helper method used to run a passed defined function with passed vars

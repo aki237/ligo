@@ -54,11 +54,11 @@ func vmMapNew(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmMapStore(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 3 {
-		vm.Throw("map-store : requires 3 arguments")
+		return vm.Throw("map-store : requires 3 arguments")
 	}
 
 	if a[0].Type != ligo.TypeMap {
-		vm.Throw("map-store : expected a <Map> type as the first argument")
+		return vm.Throw("map-store : expected a <Map> type as the first argument")
 	}
 
 	a[0].Value.(ligo.Map)[a[1]] = a[2]
@@ -67,11 +67,11 @@ func vmMapStore(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmMapDelete(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("map-delete : requires 2 arguments")
+		return vm.Throw("map-delete : requires 2 arguments")
 	}
 
 	if a[0].Type != ligo.TypeMap {
-		vm.Throw("map-delete : expected a <Map> type as the first argument")
+		return vm.Throw("map-delete : expected a <Map> type as the first argument")
 	}
 
 	delete(a[0].Value.(ligo.Map), a[1])
@@ -80,11 +80,11 @@ func vmMapDelete(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmMapGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("map-get : requires 2 arguments")
+		return vm.Throw("map-get : requires 2 arguments")
 	}
 
 	if a[0].Type != ligo.TypeMap {
-		vm.Throw("map-get : expected a <Map> type as the first argument")
+		return vm.Throw("map-get : expected a <Map> type as the first argument")
 	}
 
 	v, ok := a[0].Value.(ligo.Map)[a[1]]
@@ -103,13 +103,13 @@ func vmMem(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmArraySubArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 3 {
-		vm.Throw(fmt.Sprintf("array-subArray: require 3 arguments, got %d arguments", len(a)))
+		return vm.Throw(fmt.Sprintf("array-subArray: require 3 arguments, got %d arguments", len(a)))
 	}
 
 	if (a[0].Type != ligo.TypeArray && a[0].Type != ligo.TypeString) ||
 		a[1].Type != ligo.TypeInt ||
 		a[2].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("array-subArray: require 3 arguments (array, int, int), got (%s %s %s) arguments",
+		return vm.Throw(fmt.Sprintf("array-subArray: require 3 arguments (array, int, int), got (%s %s %s) arguments",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 			a[2].GetTypeString(),
@@ -122,7 +122,7 @@ func vmArraySubArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		end := a[2].Value.(int64)
 
 		if start >= int64(len(arr)) || start < 0 || end < start || end > int64(len(arr)) {
-			vm.Throw(fmt.Sprintf("array-subArray: invalid array index number %d %d %d", start, end, len(arr)))
+			return vm.Throw(fmt.Sprintf("array-subArray: invalid array index number %d %d %d", start, end, len(arr)))
 		}
 
 		return ligo.Variable{Type: ligo.TypeString, Value: string(arr[start:end])}
@@ -133,7 +133,7 @@ func vmArraySubArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	end := a[2].Value.(int64)
 
 	if start >= int64(len(arr)) || start < 0 || end < start || end > int64(len(arr)) {
-		vm.Throw(fmt.Sprintf("array-subArray: invalid array index number %d %d %d", start, end, len(arr)))
+		return vm.Throw(fmt.Sprintf("array-subArray: invalid array index number %d %d %d", start, end, len(arr)))
 	}
 
 	return ligo.Variable{Type: ligo.TypeArray, Value: arr[start:end]}
@@ -141,12 +141,12 @@ func vmArraySubArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmArrayIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("array-index: require 2 arguments, got %d arguments", len(a)))
+		return vm.Throw(fmt.Sprintf("array-index: require 2 arguments, got %d arguments", len(a)))
 	}
 
 	if (a[0].Type != ligo.TypeArray && a[0].Type != ligo.TypeString) ||
 		a[1].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("array-index: require 2 arguments (array, int), got (%s %s) arguments", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("array-index: require 2 arguments (array, int), got (%s %s) arguments", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	if a[0].Type == ligo.TypeString {
@@ -154,7 +154,7 @@ func vmArrayIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		nth := a[1].Value.(int64)
 
 		if nth >= int64(len(arr)) {
-			vm.Throw(fmt.Sprintf("array-index: index exceeding array-length : index (%d) > array-length (%d)", nth, len(arr)))
+			return vm.Throw(fmt.Sprintf("array-index: index exceeding array-length : index (%d) > array-length (%d)", nth, len(arr)))
 		}
 
 		return ligo.Variable{Type: ligo.TypeString, Value: string(arr[nth])}
@@ -164,7 +164,7 @@ func vmArrayIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	nth := a[1].Value.(int64)
 
 	if nth >= int64(len(arr)) {
-		vm.Throw(fmt.Sprintf("array-index: index exceeding array-length : index (%d) > array-length (%d)", nth, len(arr)))
+		return vm.Throw(fmt.Sprintf("array-index: index exceeding array-length : index (%d) > array-length (%d)", nth, len(arr)))
 	}
 
 	return arr[nth]
@@ -172,7 +172,7 @@ func vmArrayIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmInputLines(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) > 1 {
-		vm.Throw(fmt.Sprintf("input: require less than 2 arguments, got %d arguments", len(a)))
+		return vm.Throw(fmt.Sprintf("input: require less than 2 arguments, got %d arguments", len(a)))
 	}
 
 	if len(a) == 1 {
@@ -191,7 +191,7 @@ func vmInputLines(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		}
 
 		if err != nil {
-			vm.Throw(fmt.Sprintf("input : panicked when trying to read from stdin : %s", err))
+			return vm.Throw(fmt.Sprintf("input : panicked when trying to read from stdin : %s", err))
 		}
 
 		if len(input) > 0 && input[len(input)-1] == '\n' {
@@ -204,7 +204,7 @@ func vmInputLines(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmInput(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) > 1 {
-		vm.Throw(fmt.Sprintf("input: require less than 2 arguments, got %d arguments", len(a)))
+		return vm.Throw(fmt.Sprintf("input: require less than 2 arguments, got %d arguments", len(a)))
 	}
 
 	if len(a) == 1 {
@@ -219,7 +219,7 @@ func vmInput(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 
 	if err != nil {
-		vm.Throw(fmt.Sprintf("input : panicked when trying to read from stdin : %s", err))
+		return vm.Throw(fmt.Sprintf("input : panicked when trying to read from stdin : %s", err))
 	}
 
 	if len(input) > 0 && input[len(input)-1] == '\n' {
@@ -231,11 +231,11 @@ func vmInput(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmSprintf(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) < 1 {
-		vm.Throw("sprintf : expected atleast one argument")
+		return vm.Throw("sprintf : expected atleast one argument")
 	}
 
 	if a[0].Type != ligo.TypeString {
-		vm.Throw("sprintf : format expected as a string type")
+		return vm.Throw("sprintf : format expected as a string type")
 	}
 
 	values := collectVars(a[1:])
@@ -259,13 +259,13 @@ func collectVars(a []ligo.Variable) []interface{} {
 
 func vmOr(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) < 1 {
-		vm.Throw("or : expected atleast one argument")
+		return vm.Throw("or : expected atleast one argument")
 	}
 
 	resultBool := true
 	for _, val := range a {
 		if a[0].Type != ligo.TypeBool {
-			vm.Throw("or : expected only boolean arguments, got " + val.GetTypeString())
+			return vm.Throw("or : expected only boolean arguments, got " + val.GetTypeString())
 		}
 
 		resultBool = resultBool || val.Value.(bool)
@@ -275,13 +275,13 @@ func vmOr(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmAnd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) < 1 {
-		vm.Throw("and : expected atleast one argument")
+		return vm.Throw("and : expected atleast one argument")
 	}
 
 	resultBool := true
 	for _, val := range a {
 		if a[0].Type != ligo.TypeBool {
-			vm.Throw("and : expected only boolean arguments, got " + val.GetTypeString())
+			return vm.Throw("and : expected only boolean arguments, got " + val.GetTypeString())
 		}
 
 		resultBool = resultBool && val.Value.(bool)
@@ -291,11 +291,11 @@ func vmAnd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmNot(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw(fmt.Sprintf("not : expected one argument, got %d argument(s)", len(a)))
+		return vm.Throw(fmt.Sprintf("not : expected one argument, got %d argument(s)", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeBool {
-		vm.Throw(fmt.Sprintf("not : expected one argument of boolean type, got type %s", a[0].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("not : expected one argument of boolean type, got type %s", a[0].GetTypeString()))
 	}
 
 	return ligo.Variable{Type: ligo.TypeBool, Value: !a[0].Value.(bool)}
@@ -303,11 +303,11 @@ func vmNot(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmArrayAppend(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) < 2 {
-		vm.Throw("wrong no. of arguments to the append function")
+		return vm.Throw("wrong no. of arguments to the append function")
 	}
 
 	if a[0].Type < 0x100 && a[0].Type != ligo.TypeString {
-		vm.Throw("append function's first argument should be of a array type, Got " + a[0].GetTypeString())
+		return vm.Throw("append function's first argument should be of a array type, Got " + a[0].GetTypeString())
 	}
 
 	if a[0].Type == ligo.TypeString {
@@ -321,7 +321,7 @@ func vmArrayAppend(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 				str += val.Value.(string)
 				continue
 			}
-			vm.Throw(fmt.Sprintf("append : unable to append %s type to String", val.GetTypeString()))
+			return vm.Throw(fmt.Sprintf("append : unable to append %s type to String", val.GetTypeString()))
 		}
 		return ligo.Variable{Type: ligo.TypeString, Value: str}
 	}
@@ -383,11 +383,11 @@ func loadFile(fileName string, vm *ligo.VM) error {
 
 func vmReciprocal(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("reciprocal : wrong number of arguments")
+		return vm.Throw("reciprocal : wrong number of arguments")
 	}
 	num := a[0]
 	if num.Type != ligo.TypeInt && num.Type != ligo.TypeFloat {
-		vm.Throw("reciprocal : expects a number type argument, got " + num.GetTypeString())
+		return vm.Throw("reciprocal : expects a number type argument, got " + num.GetTypeString())
 	}
 	if num.Type == ligo.TypeFloat {
 		return ligo.Variable{Type: ligo.TypeFloat, Value: 1 / num.Value.(float64)}
@@ -398,7 +398,7 @@ func vmReciprocal(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmCar(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("car can be done for one variable only")
+		return vm.Throw("car can be done for one variable only")
 	}
 	if a[0].Type < 100 {
 		if a[0].Type == ligo.TypeString {
@@ -408,7 +408,7 @@ func vmCar(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 			}
 			return ligo.Variable{Type: ligo.TypeString, Value: string(str[0])}
 		}
-		vm.Throw("car can be done only for array or string type")
+		return vm.Throw("car can be done only for array or string type")
 	}
 
 	array := a[0].Value.([]ligo.Variable)
@@ -420,7 +420,7 @@ func vmCar(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmCdr(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("cdr can be done for one variable only")
+		return vm.Throw("cdr can be done for one variable only")
 	}
 	if a[0].Type < 0x100 {
 		if a[0].Type == ligo.TypeString {
@@ -430,7 +430,7 @@ func vmCdr(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 			}
 			return ligo.Variable{Type: ligo.TypeString, Value: string(str[1:])}
 		}
-		vm.Throw(fmt.Sprint("cdr can be done only for array type", a[0]))
+		return vm.Throw(fmt.Sprint("cdr can be done only for array type", a[0]))
 	}
 	array := a[0].Value.([]ligo.Variable)
 	if len(array) <= 1 {
@@ -441,11 +441,11 @@ func vmCdr(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmInEqualityGT(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("InEquality can be done for 2 numbers only")
+		return vm.Throw("InEquality can be done for 2 numbers only")
 	}
 	if (a[0].Type != ligo.TypeInt && a[0].Type != ligo.TypeFloat) ||
 		(a[1].Type != ligo.TypeInt && a[1].Type != ligo.TypeFloat) {
-		vm.Throw("InEquality can be done for 2 numbers only")
+		return vm.Throw("InEquality can be done for 2 numbers only")
 	}
 	var num1, num2 float64
 	if a[0].Type == ligo.TypeInt {
@@ -464,10 +464,10 @@ func vmInEqualityGT(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmInEqualityGTEQ(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("InEquality can be done for 2 integers only")
+		return vm.Throw("InEquality can be done for 2 integers only")
 	}
 	if a[0].Type != ligo.TypeInt || a[1].Type != ligo.TypeInt {
-		vm.Throw("InEquality can be done for 2 integers only")
+		return vm.Throw("InEquality can be done for 2 integers only")
 	}
 	num1 := a[0].Value.(int64)
 	num2 := a[1].Value.(int64)
@@ -476,10 +476,10 @@ func vmInEqualityGTEQ(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmInEqualityLTEQ(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("InEquality can be done for 2 integers only")
+		return vm.Throw("InEquality can be done for 2 integers only")
 	}
 	if a[0].Type != ligo.TypeInt || a[1].Type != ligo.TypeInt {
-		vm.Throw("InEquality can be done for 2 integers only")
+		return vm.Throw("InEquality can be done for 2 integers only")
 	}
 	num1 := a[0].Value.(int64)
 	num2 := a[1].Value.(int64)
@@ -488,11 +488,11 @@ func vmInEqualityLTEQ(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmEquality(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("Equality can be done for 2 integers only")
+		return vm.Throw("Equality can be done for 2 integers only")
 	}
 	if a[0].Type != a[1].Type {
 		fmt.Println(a[0], a[1])
-		vm.Throw(fmt.Sprintf("Equality can be done for 2 Values of same types only : found %s and %s, %s %s",
+		return vm.Throw(fmt.Sprintf("Equality can be done for 2 Values of same types only : found %s and %s, %s %s",
 			a[0].GetTypeString(), a[1].GetTypeString(), a[0], a[1]))
 	}
 	return ligo.Variable{Type: ligo.TypeBool, Value: a[0] == a[1]}
@@ -500,10 +500,10 @@ func vmEquality(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmModulus(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw("Modulus can be done for 2 integers only")
+		return vm.Throw("Modulus can be done for 2 integers only")
 	}
 	if a[0].Type != ligo.TypeInt || a[1].Type != ligo.TypeInt {
-		vm.Throw("Modulus can be done for 2 integers only")
+		return vm.Throw("Modulus can be done for 2 integers only")
 	}
 	num1 := a[0].Value.(int64)
 	num2 := a[1].Value.(int64)
@@ -512,7 +512,7 @@ func vmModulus(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmType(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("Keyword cannot take more than 1 argument")
+		return vm.Throw("Keyword cannot take more than 1 argument")
 	}
 
 	return ligo.Variable{Type: ligo.TypeString, Value: a[0].GetTypeString()}
@@ -548,9 +548,9 @@ func vmPrintln(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmThrow(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("Cannot accept more that 1 variable")
+		return vm.Throw("Cannot accept more that 1 variable")
 	}
-	vm.Throw(fmt.Sprint(a[0].Value))
+	return vm.Throw(fmt.Sprint(a[0].Value))
 	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
 }
 
@@ -561,7 +561,7 @@ func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	sumf := float64(0)
 	for i, val := range a {
 		if val.Type != ligo.TypeInt && val.Type != ligo.TypeFloat && val.Type != ligo.TypeString {
-			vm.Throw("Cannot add a variable of type that is not String, Int or a Float.")
+			return vm.Throw("Cannot add a variable of type that is not String, Int or a Float.")
 		}
 		if i == 0 {
 			if val.Type == ligo.TypeInt || val.Type == ligo.TypeFloat {
@@ -570,7 +570,7 @@ func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		}
 		if number {
 			if val.Type == ligo.TypeString {
-				vm.Throw("Cannot add a string to a number")
+				return vm.Throw("Cannot add a string to a number")
 			}
 			switch val.Value.(type) {
 			case int64:
@@ -581,7 +581,7 @@ func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 			}
 		} else {
 			if val.Type == ligo.TypeInt || val.Type == ligo.TypeFloat {
-				vm.Throw("Cannot add a number to a string")
+				return vm.Throw("Cannot add a number to a string")
 			}
 			sums += val.Value.(string)
 		}
@@ -601,7 +601,7 @@ func vmProd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	float := false
 	for _, val := range a {
 		if val.Type != ligo.TypeInt && val.Type != ligo.TypeFloat {
-			vm.Throw("Cannot use this type in product")
+			return vm.Throw("Cannot use this type in product")
 		}
 		switch val.Value.(type) {
 		case int64:
@@ -627,13 +627,13 @@ func vmProd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmArraySet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 3 {
-		vm.Throw(fmt.Sprintf("wrong number of parameters for the array-set function, required 3, got %d", len(a)))
+		return vm.Throw(fmt.Sprintf("wrong number of parameters for the array-set function, required 3, got %d", len(a)))
 	}
 	array := a[0].Value.([]ligo.Variable)
 	index := a[1].Value.(int64)
 
 	if index >= int64(len(array)) || index < 0 {
-		vm.Throw(fmt.Sprintf("index value of %d is invalid corresponding to the highest index %d", index, len(array)))
+		return vm.Throw(fmt.Sprintf("index value of %d is invalid corresponding to the highest index %d", index, len(array)))
 	}
 
 	array[index] = a[2]
@@ -643,10 +643,10 @@ func vmArraySet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmLen(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("len can be done for one variable only")
+		return vm.Throw("len can be done for one variable only")
 	}
 	if a[0].Type != ligo.TypeArray && a[0].Type != ligo.TypeString && a[0].Type != ligo.TypeMap {
-		vm.Throw(fmt.Sprint("len can be done only for array type ", a[0].GetTypeString(), " ", a[0].Value))
+		return vm.Throw(fmt.Sprint("len can be done only for array type ", a[0].GetTypeString(), " ", a[0].Value))
 	}
 	if a[0].Type == ligo.TypeString {
 		return ligo.Variable{Type: ligo.TypeInt, Value: int64(len(a[0].Value.(string)))}
@@ -659,10 +659,10 @@ func vmLen(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmSleep(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("sleep expects only one argument")
+		return vm.Throw("sleep expects only one argument")
 	}
 	if a[0].Type != ligo.TypeInt {
-		vm.Throw("sleep expects only integers")
+		return vm.Throw("sleep expects only integers")
 	}
 	time.Sleep(time.Duration(a[0].Value.(int64)) * time.Millisecond)
 	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
@@ -670,7 +670,7 @@ func vmSleep(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmIsNil(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("is-nil : expects only one argument")
+		return vm.Throw("is-nil : expects only one argument")
 	}
 
 	if a[0].Type == ligo.TypeNil || a[0].Value == nil {

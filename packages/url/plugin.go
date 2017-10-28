@@ -14,7 +14,7 @@ func PluginInit(vm *ligo.VM) {
 
 func vmURLGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw("urlget expects atleast 1 variable")
+		return vm.Throw("urlget expects atleast 1 variable")
 	}
 
 	url := a[0].Value.(string)

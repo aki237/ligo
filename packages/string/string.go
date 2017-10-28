@@ -38,11 +38,11 @@ func PluginInit(vm *ligo.VM) {
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	ret := ""
 	if len(a) != 1 {
-		vm.Throw(fmt.Sprintf("string-fromArray : can take only 1 argument, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-fromArray : can take only 1 argument, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeArray {
-		vm.Throw(fmt.Sprintf("string-fromArray : can take only 1 argument of array type, got %s.", a[0].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-fromArray : can take only 1 argument of array type, got %s.", a[0].GetTypeString()))
 	}
 
 	arr := a[0].Value.([]ligo.Variable)
@@ -51,13 +51,13 @@ func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		switch val.Type {
 		case ligo.TypeInt:
 			if val.Value.(int64) <= 0 {
-				vm.Throw(fmt.Sprintf("string-fromArray : the array can only contain positive integers, got %d", val.Value.(int64)))
+				return vm.Throw(fmt.Sprintf("string-fromArray : the array can only contain positive integers, got %d", val.Value.(int64)))
 			}
 			ret = string(val.Value.(int64))
 		case ligo.TypeString:
 			ret += val.Value.(string)
 		default:
-			vm.Throw(fmt.Sprintf("string-fromArray : the array can only contain positive integers or strings, got %s", val.GetTypeString()))
+			return vm.Throw(fmt.Sprintf("string-fromArray : the array can only contain positive integers or strings, got %s", val.GetTypeString()))
 		}
 	}
 
@@ -66,11 +66,11 @@ func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringLowerCase(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
 	}
 
 	ret := strings.ToLower(a[0].Value.(string))
@@ -80,11 +80,11 @@ func vmStringLowerCase(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringUpperCase(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-lowerCase : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
 	}
 
 	ret := strings.ToUpper(a[0].Value.(string))
@@ -94,11 +94,11 @@ func vmStringUpperCase(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrimSpace(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 1 {
-		vm.Throw(fmt.Sprintf("string-trimSpace : can take only 1 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trimSpace : can take only 1 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trimSpace : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-trimSpace : can take only 1 argument of string type, got %s.", a[0].GetTypeString()))
 	}
 
 	return ligo.Variable{Type: ligo.TypeString, Value: strings.TrimSpace(a[0].Value.(string))}
@@ -106,12 +106,12 @@ func vmStringTrimSpace(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringIndexOf(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-indexOf : can take only 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-indexOf : can take only 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString ||
 		a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-indexOf : can take only 2 arguments of string type, got %s %s.",
+		return vm.Throw(fmt.Sprintf("string-indexOf : can take only 2 arguments of string type, got %s %s.",
 			a[0].GetTypeString(),
 			a[1].GetTypeString()))
 	}
@@ -124,14 +124,14 @@ func vmStringIndexOf(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringReplace(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 4 {
-		vm.Throw(fmt.Sprintf("string-replace : should take 4 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-replace : should take 4 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString ||
 		a[1].Type != ligo.TypeString ||
 		a[2].Type != ligo.TypeString ||
 		a[3].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("string-replace : should 4 arguments of (string, string, string, int) types, got (%s, %s, %s, %s).",
+		return vm.Throw(fmt.Sprintf("string-replace : should 4 arguments of (string, string, string, int) types, got (%s, %s, %s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 			a[2].GetTypeString(),
@@ -148,11 +148,11 @@ func vmStringReplace(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringSplit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-split : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-split : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-split : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-split : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	str1 := a[0].Value.(string)
@@ -169,11 +169,11 @@ func vmStringSplit(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringHasPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-hasPrefix : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-hasPrefix : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-hasPrefix : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-hasPrefix : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	str := a[0].Value.(string)
@@ -184,11 +184,11 @@ func vmStringHasPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringHasSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-hasSuffix : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-hasSuffix : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-hasSuffix : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-hasSuffix : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	str := a[0].Value.(string)
@@ -199,11 +199,11 @@ func vmStringHasSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringCompare(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-compare : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-compare : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-compare : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-compare : should take 2 arguments of type string, got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	str1 := a[0].Value.(string)
@@ -214,18 +214,18 @@ func vmStringCompare(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-repeat : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-repeat : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("string-repeat : should take 2 arguments of type (string, int), got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
+		return vm.Throw(fmt.Sprintf("string-repeat : should take 2 arguments of type (string, int), got (%s, %s).", a[0].GetTypeString(), a[1].GetTypeString()))
 	}
 
 	str := a[0].Value.(string)
 	repetitions := a[1].Value.(int64)
 
 	if repetitions < 0 {
-		vm.Throw(fmt.Sprintf("string-repeat : second argument should be a positive integer, got %d.", repetitions))
+		return vm.Throw(fmt.Sprintf("string-repeat : second argument should be a positive integer, got %d.", repetitions))
 	}
 
 	return ligo.Variable{Type: ligo.TypeString, Value: strings.Repeat(str, int(repetitions))}
@@ -233,11 +233,11 @@ func vmStringRepeat(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringCount(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-count : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-count : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-count : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-count : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -251,11 +251,11 @@ func vmStringCount(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringContains(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-contains : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -269,11 +269,11 @@ func vmStringContains(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringContainsAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-containsAny : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -287,11 +287,11 @@ func vmStringContainsAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringLastIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-lastIndex : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -305,11 +305,11 @@ func vmStringLastIndex(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-lastIndexAny : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -323,11 +323,11 @@ func vmStringLastIndexAny(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrim(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-trim : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -341,11 +341,11 @@ func vmStringTrim(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrimPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-trimPrefix : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -359,11 +359,11 @@ func vmStringTrimPrefix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrimSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-trimSuffix : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -377,11 +377,11 @@ func vmStringTrimSuffix(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrimLeft(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-trimLeft : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -395,11 +395,11 @@ func vmStringTrimLeft(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringTrimRight(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments of type (string, string), got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-trimRight : should take 2 arguments of type (string, string), got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -413,11 +413,11 @@ func vmStringTrimRight(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringSplitAfter(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 2 {
-		vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString {
-		vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments of type string, got (%s, %s).",
+		return vm.Throw(fmt.Sprintf("string-splitAfter : should take 2 arguments of type string, got (%s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 		))
@@ -437,11 +437,11 @@ func vmStringSplitAfter(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringSplitN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 3 {
-		vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString || a[2].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
+		return vm.Throw(fmt.Sprintf("string-splitN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 			a[2].GetTypeString(),
@@ -463,11 +463,11 @@ func vmStringSplitN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 func vmStringSplitAfterN(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	if len(a) != 3 {
-		vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments, got %d.", len(a)))
+		return vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments, got %d.", len(a)))
 	}
 
 	if a[0].Type != ligo.TypeString || a[1].Type != ligo.TypeString || a[2].Type != ligo.TypeInt {
-		vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
+		return vm.Throw(fmt.Sprintf("string-splitAfterN : should take 3 arguments of type (string,string,int), got (%s, %s, %s).",
 			a[0].GetTypeString(),
 			a[1].GetTypeString(),
 			a[2].GetTypeString(),

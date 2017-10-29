@@ -49,7 +49,7 @@ func PluginInit(vm *ligo.VM) {
 }
 
 func vmMapNew(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
-	return ligo.Variable{Type: ligo.TypeMap, Value: make(ligo.Map, 0)}
+	return ligo.Variable{Type: ligo.TypeMap, Value: make(ligo.Map)}
 }
 
 func vmMapStore(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
@@ -551,7 +551,6 @@ func vmThrow(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		return vm.Throw("Cannot accept more that 1 variable")
 	}
 	return vm.Throw(fmt.Sprint(a[0].Value))
-	return ligo.Variable{Type: ligo.TypeNil, Value: nil}
 }
 
 func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

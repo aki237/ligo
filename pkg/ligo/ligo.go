@@ -158,83 +158,104 @@ func (vm *VM) Resume() {
 	vm.pc.interrupt = false
 }
 
+// parseToArray is used to parse the given string into ligo.TypeArray
+func (vm *VM) parseToArray(token string) (Variable, error) {
+	ar := token[1:MatchChars(token, 0, '[', ']')]
+	tkns, err := ScanTokens("(" + ar + ")")
+	if err != nil {
+		return ligoNil, err
+	}
+	vars := make([]Variable, 0)
+	for _, val := range tkns {
+		v, err := vm.GetVariable(val)
+		if err != nil {
+			return ligoNil, err
+		}
+		vars = append(vars, v)
+	}
+	retVars := Variable{Type: TypeArray, Value: vars}
+	return retVars, nil
+}
+
+// parseToInt method is used to parse a given string to ligo.TypeInt
+func (vm *VM) parseToInt(token string) (Variable, error) {
+	num, err := strconv.ParseInt(token, 10, 64)
+	if err != nil {
+		return ligoNil, err
+	}
+	return Variable{Type: TypeInt, Value: num}, nil
+}
+
+// parseToFloat method is used to parse a given string to ligo.TypeFloat
+func (vm *VM) parseToFloat(token string) (Variable, error) {
+	num, err := strconv.ParseFloat(token, 64)
+	if err != nil {
+		return ligoNil, err
+	}
+	return Variable{Type: TypeFloat, Value: num}, nil
+}
+
+// parseToString method is used to reform escape sequences and
+// return a ligo.TypeString
+func (vm *VM) parseToString(token string) (Variable, error) {
+	token = reformEscapes(token)
+	return Variable{Type: TypeString, Value: token[1 : len(token)-1]}, nil
+}
+
+// parseToSymbol method is used to fetch the variable from the VM.
+// If the variable is not found, it checks whether a function is found
+// and returns it.
+func (vm *VM) parseToSymbol(token string) (Variable, error) {
+	varFromVM, ok := vm.Vars[token]
+	if ok {
+		return Variable{Type: varFromVM.Type, Value: varFromVM.Value}, nil
+	}
+	function, err := vm.parseToFunc(token)
+	if err == nil {
+		return function, nil
+	}
+
+	return ligoNil, ErrNoVariable
+}
+
+// parseToFunc method is used to find the function from the vm and return it.
+func (vm *VM) parseToFunc(token string) (Variable, error) {
+	if fnc, ok := vm.Funcs[token]; ok {
+		return Variable{Type: TypeIFunc, Value: fnc}, nil
+	}
+	if fnc, ok := vm.LFuncs[token]; ok {
+		return Variable{Type: TypeDFunc, Value: fnc}, nil
+	}
+	return ligoNil, ErrFuncNotFound
+}
+
 // GetVariable method is used to process the token string passed and get the
 // corresponding value from the VM's memory. This is a crucial function
 // as, if the token passed is a sub expression this method knows to evaluate and
 // return the value of that sub expression.
 func (vm *VM) GetVariable(token string) (Variable, error) {
-	v := ligoNil
 	if len(token) < 1 {
-		return ligoNil, Error("Invalid Token passed")
+		return ligoNil, Error("invalid Token passed")
 	}
 	switch true {
 	case rArray.MatchString(token):
-		ar := token[1:MatchChars(token, 0, '[', ']')]
-		tkns, err := ScanTokens("(" + ar + ")")
-		if err != nil {
-			return ligoNil, err
-		}
-		vars := make([]Variable, 0)
-		for _, val := range tkns {
-			v, err := vm.GetVariable(val)
-			if err != nil {
-				return ligoNil, err
-			}
-			vars = append(vars, v)
-		}
-		retVars := Variable{Type: TypeArray, Value: vars}
-		return retVars, nil
-	case rExpression.MatchString(token) || MatchChars(token, 0, '(', ')') > 0:
-		var err error
-		v, err = vm.Eval(token)
-		if err != nil {
-			return ligoNil, err
-		}
+		return vm.parseToArray(token)
+	case MatchChars(token, 0, '(', ')') > 0:
+		return vm.Eval(token)
 	case rInteger.MatchString(token):
-		num, err := strconv.ParseInt(token, 10, 64)
-		if err != nil {
-			fmt.Println(err)
-		}
-		v = Variable{Type: TypeInt, Value: num}
+		return vm.parseToInt(token)
 	case rFloat.MatchString(token):
-		num, _ := strconv.ParseFloat(token, 64)
-		v = Variable{Type: TypeFloat, Value: num}
+		return vm.parseToFloat(token)
 	case rString.MatchString(token) || token[0] == '"':
-		token = reformEscapes(token)
-		v = Variable{Type: TypeString, Value: token[1 : len(token)-1]}
+		return vm.parseToString(token)
 	case token == "true":
-		v = Variable{Type: TypeBool, Value: true}
+		return Variable{Type: TypeBool, Value: true}, nil
 	case token == "false":
-		v = Variable{Type: TypeBool, Value: false}
+		return Variable{Type: TypeBool, Value: false}, nil
 	case rVariable.MatchString(token):
-		varFromVM, ok := vm.Vars[token]
-		if ok {
-			v = Variable{Type: varFromVM.Type, Value: varFromVM.Value}
-			break
-		}
-		if fnc, ok := vm.Funcs[token]; ok {
-			v = Variable{Type: TypeIFunc, Value: fnc}
-			break
-		}
-		if fnc, ok := vm.LFuncs[token]; ok {
-			v = Variable{Type: TypeDFunc, Value: fnc}
-			break
-		}
-		v = ligoNil
-	default:
-		if fnc, ok := vm.Funcs[token]; ok {
-			v = Variable{Type: TypeIFunc, Value: fnc}
-			break
-		}
-		if fnc, ok := vm.LFuncs[token]; ok {
-			v = Variable{Type: TypeDFunc, Value: fnc}
-			break
-		}
+		return vm.parseToSymbol(token)
 	}
-	if v == ligoNil && vm.global != nil {
-		return vm.global.GetVariable(token)
-	}
-	return v, nil
+	return vm.parseToFunc(token)
 }
 
 // setFn is used to parse a ligo function construct and store it in the
@@ -709,7 +730,11 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 	if fnName == "catch" {
 		return vm.catchException(tkns)
 	}
+	return vm.evalKeyword(fnName, tkns)
+}
 
+// evalKeyword is used to run the corresponding function for the given keyword
+func (vm *VM) evalKeyword(fnName string, tkns []string) (Variable, error) {
 	switch fnName {
 	case "var":
 		return vm.newVar(tkns)
@@ -734,6 +759,7 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 	case "delete":
 		return vm.deleteVar(tkns)
 	}
+
 	return vm.run(tkns)
 }
 

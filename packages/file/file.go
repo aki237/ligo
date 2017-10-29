@@ -152,3 +152,7 @@ func vmFileWrite(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 	}
 	return ligo.Variable{Type: ligo.TypeInt, Value: int64(written)}
 }
+
+func main() {
+
+}

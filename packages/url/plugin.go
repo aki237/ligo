@@ -33,3 +33,7 @@ func vmURLGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 	return ligo.Variable{Type: ligo.TypeString, Value: string(bs)}
 }
+
+func main() {
+
+}

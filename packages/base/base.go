@@ -679,3 +679,7 @@ func vmIsNil(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 	return ligo.Variable{Type: ligo.TypeBool, Value: false}
 }
+
+func main() {
+
+}

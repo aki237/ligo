@@ -55,13 +55,13 @@ func reformEscapes(str string) string {
 }
 
 // regexp variables for matching the syntax of the script
-var rInteger = regexp.MustCompile("^[+-]?[0-9]+$")
-var rFloat = regexp.MustCompile("^[+-]?[0-9]*\\.[0-9]+$")
-var rString = regexp.MustCompile("^\".*\"$")
-var rVariable = regexp.MustCompile("^[[:alpha:]]+[[:alnum:]]*$")
-var rExpression = regexp.MustCompile("^\\(.*\\)$")
-var rClosure = regexp.MustCompile("^\\|([[:alpha:]]+[[:alnum:]]*\\s*)*\\.\\.\\.([[:alpha:]]+[[:alnum:]]*\\s*){0,1}|$")
-var rArray = regexp.MustCompile("^\\[(.*\\s*)*\\]$")
+var rInteger = regexp.MustCompile(`^[+-]?[0-9]+$`)
+var rFloat = regexp.MustCompile(`^[+-]?[0-9]*\\.[0-9]+$`)
+var rString = regexp.MustCompile(`^\".*\"$`)
+var rVariable = regexp.MustCompile(`^[[:alpha:]]+[[:alnum:]]*$`)
+var rExpression = regexp.MustCompile(`^\\(.*\\)$`)
+var rClosure = regexp.MustCompile(`^\\|([[:alpha:]]+[[:alnum:]]*\\s*)*\\.\\.\\.([[:alpha:]]+[[:alnum:]]*\\s*){0,1}|$`)
+var rArray = regexp.MustCompile(`^\\[(.*\\s*)*\\]$`)
 
 // Variable is a struct denoting a value in the VM
 type Variable struct {
@@ -134,9 +134,9 @@ type VM struct {
 // NewVM returns a new VM object pointer after initializing the values
 func NewVM() *VM {
 	vm := &VM{}
-	vm.Vars = make(map[string]Variable, 0)
-	vm.Funcs = make(map[string]InBuilt, 0)
-	vm.LFuncs = make(map[string]Defined, 0)
+	vm.Vars = make(map[string]Variable)
+	vm.Funcs = make(map[string]InBuilt)
+	vm.LFuncs = make(map[string]Defined)
 	vm.global = nil
 	vm.pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
 	return vm

@@ -15,27 +15,14 @@ import (
 
 func runInteractive(vm *ligo.VM) {
 	expression := ""
-	vm.Vars["PS1"] = ligo.Variable{Type: ligo.TypeString, Value: ">>> "}
 
-	home := filepath.Join(os.Getenv("HOME"), ".ligorc")
-	f, err := os.Open(home)
-	if err == nil {
-		vm.LoadReader(f)
-		f.Close()
-	}
+	loadRCFile(vm)
 
-	rl, err := readline.New(">>> ")
+	rl, err := readline.New(getPrompt(vm))
 	if err != nil {
 		panic(err)
 	}
 	defer rl.Close()
-
-	if ps1, ok := vm.Vars["PS1"]; ok {
-		psraw, ok := ps1.Value.(string)
-		if ok {
-			rl.SetPrompt(psraw)
-		}
-	}
 
 	running := false
 	new := true
@@ -55,13 +42,7 @@ func runInteractive(vm *ligo.VM) {
 
 	for {
 		if new {
-			rl.SetPrompt(">>> ")
-			if ps1, ok := vm.Vars["PS1"]; ok {
-				psraw, ok := ps1.Value.(string)
-				if ok {
-					rl.SetPrompt(psraw)
-				}
-			}
+			rl.SetPrompt(getPrompt(vm))
 		} else {
 			rl.SetPrompt("... ")
 		}
@@ -116,4 +97,26 @@ func runInteractive(vm *ligo.VM) {
 		}
 		new = false
 	}
+}
+
+func loadRCFile(vm *ligo.VM) {
+	home := filepath.Join(os.Getenv("HOME"), ".ligorc")
+	f, err := os.Open(home)
+	if err == nil {
+		vm.LoadReader(f)
+		f.Close()
+	}
+}
+
+func getPrompt(vm *ligo.VM) string {
+	defaultPrompt := ">>> "
+	ps1, ok := vm.Vars["PS1"]
+	if !ok {
+		return defaultPrompt
+	}
+	psraw, ok := ps1.Value.(string)
+	if !ok {
+		return defaultPrompt
+	}
+	return psraw
 }

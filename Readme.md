@@ -3,6 +3,7 @@
 [![Join the chat at https://gitter.im/hackingligo/Lobby](https://badges.gitter.im/hackingligo/Lobby.svg)](https://gitter.im/hackingligo/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aki237/ligo)](https://goreportcard.com/report/github.com/aki237/ligo)
 [![GoDoc](https://godoc.org/github.com/aki237/ligo?status.svg)](https://godoc.org/github.com/aki237/ligo)
+[![Build Status](https://travis-ci.org/aki237/ligo.svg?branch=master)](https://travis-ci.org/aki237/ligo)
 
 + This is just a hobby project.
 + No documentation

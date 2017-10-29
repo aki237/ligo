@@ -183,7 +183,7 @@ func vmInputLines(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 
 	rd := bufio.NewReader(os.Stdin)
 
-	for true {
+	for {
 		input, err := rd.ReadString('\n')
 
 		if err == io.EOF {

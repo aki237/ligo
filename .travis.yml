@@ -5,13 +5,11 @@ go:
 before_script:
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/ | grep -v /packages/)
   - go get github.com/golang/lint/golint
-  - go get honnef.co/go/tools/cmd/megacheck
 
 script:
   - go get -d -v ./...
-  - go install $GOPATH/src/github.com/aki237/ligo/cmd/ligo/
+  - go install github.com/aki237/ligo/cmd/ligo/
   - test -z $(gofmt -s -l $GO_FILES)
   - go test -v -race ./...
   - go vet ./...
-  - megacheck ./...
   - golint -set_exit_status $(go list ./...)

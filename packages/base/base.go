@@ -187,7 +187,7 @@ func vmInputLines(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 		input, err := rd.ReadString('\n')
 
 		if err == io.EOF {
-			return ligo.Variable{Type: ligo.TypeArray, Value: lines}
+			break
 		}
 
 		if err != nil {

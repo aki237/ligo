@@ -66,6 +66,12 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 		return nil
 	}
 	home := os.Getenv("HOME")
+
+	// Either /home/$USER or $LIGOPATH can be a path for library searching
+	if ligopath := os.Getenv("LIGOPATH"); ligopath != "" {
+		home = ligopath
+	}
+
 	dir := filepath.Join(home, "ligo", "lib", packageName)
 	if !exists(dir) {
 		return ligo.Error("Package \"" + packageName + "\" not found in the system")

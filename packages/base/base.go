@@ -554,44 +554,76 @@ func vmThrow(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
 }
 
 func vmAdd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {
-	number := false
-	tp := ligo.TypeInt
-	sums := ""
-	sumf := float64(0)
-	for i, val := range a {
-		if val.Type != ligo.TypeInt && val.Type != ligo.TypeFloat && val.Type != ligo.TypeString {
-			return vm.Throw("Cannot add a variable of type that is not String, Int or a Float.")
-		}
-		if i == 0 {
-			if val.Type == ligo.TypeInt || val.Type == ligo.TypeFloat {
-				number = true
+	if len(a) < 1 {
+		vm.Throw("+ expects atleast one value to be passed")
+	}
+	numberAddition := true
+	isFloat := false
+	for i, param := range a {
+		switch param.Type {
+		case ligo.TypeFloat, ligo.TypeInt:
+			if !numberAddition {
+				return vm.Throw("+ cannot add a numeric value to a string")
 			}
-		}
-		if number {
-			if val.Type == ligo.TypeString {
-				return vm.Throw("Cannot add a string to a number")
+			if param.Type == ligo.TypeFloat {
+				isFloat = true
 			}
-			switch val.Value.(type) {
-			case int64:
-				sumf += float64(val.Value.(int64))
-			case float64:
-				tp = ligo.TypeFloat
-				sumf += val.Value.(float64)
+		case ligo.TypeString:
+			if i == 0 {
+				numberAddition = false
 			}
-		} else {
-			if val.Type == ligo.TypeInt || val.Type == ligo.TypeFloat {
-				return vm.Throw("Cannot add a number to a string")
+			if numberAddition {
+				return vm.Throw("+ cannot add a numeric value to a number")
 			}
-			sums += val.Value.(string)
 		}
 	}
-	if !number {
-		return ligo.Variable{Type: ligo.TypeString, Value: sums}
+
+	if numberAddition {
+		if isFloat {
+			return privateFloatAdd(a...)
+		}
+		return privateIntegerAdd(a...)
 	}
-	if tp == ligo.TypeInt {
-		return ligo.Variable{Type: ligo.TypeInt, Value: int64(sumf)}
+	return privateStringAdd(a...)
+}
+
+func privateIntegerAdd(a ...ligo.Variable) ligo.Variable {
+	sum := int64(0)
+	for _, val := range a {
+		num, ok := val.Value.(int64)
+		if !ok {
+			panic("value not supported as a integer")
+		}
+		sum += num
 	}
-	return ligo.Variable{Type: ligo.TypeFloat, Value: sumf}
+	return ligo.Variable{Type: ligo.TypeInt, Value: sum}
+}
+
+func privateFloatAdd(a ...ligo.Variable) ligo.Variable {
+	sum := float64(0)
+	for _, val := range a {
+		switch val.Value.(type) {
+		case int64:
+			sum += float64(val.Value.(int64))
+		case float64:
+			sum += val.Value.(float64)
+		default:
+			panic("value not supported as a number")
+		}
+	}
+	return ligo.Variable{Type: ligo.TypeFloat, Value: sum}
+}
+
+func privateStringAdd(a ...ligo.Variable) ligo.Variable {
+	sum := ""
+	for _, val := range a {
+		num, ok := val.Value.(string)
+		if !ok {
+			panic("value not supported as a integer")
+		}
+		sum += num
+	}
+	return ligo.Variable{Type: ligo.TypeString, Value: sum}
 }
 
 func vmProd(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

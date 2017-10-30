@@ -9,7 +9,7 @@ import (
 )
 
 func runFile(vm *ligo.VM) {
-	f, err := os.Open(os.Args[1])
+	f, err := os.Open(os.Args[0])
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -20,37 +20,25 @@ func runInteractive(vm *ligo.VM) {
 
 	rl, err := readline.New(getPrompt(vm))
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer rl.Close()
 
 	running := false
-	new := true
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for sig := range c {
-			if running {
-				fmt.Fprintln(os.Stderr, sig)
-				vm.Stop()
-			}
-		}
-	}()
+	go handleSignals(vm, &running)
 
 	errorFmt := color.New(color.FgRed).Add(color.Bold).Add(color.BgWhite)
 
 	for {
-		if new {
-			rl.SetPrompt(getPrompt(vm))
-		} else {
-			rl.SetPrompt("... ")
-		}
-
 		part, err := rl.Readline()
-		if err == io.EOF {
+		switch err {
+		case io.EOF:
 			fmt.Println("\rBye...")
-			break
+			os.Exit(0)
+		case readline.ErrInterrupt:
+			continue
 		}
 
 		part = ligo.StripComments(part)
@@ -59,20 +47,22 @@ func runInteractive(vm *ligo.VM) {
 		if part == "" {
 			continue
 		}
-		if new {
-			if part[0] != '(' {
-				fmt.Printf("Error in the expression passed : %s \n\t %s\n",
-					errorFmt.Sprintf("%s", "the expression should start with a '(' got '"+string(part[0])+"'"), part)
-				expression = ""
+		if expression == "" && part[0] != '(' {
+			v, err := vm.Eval(part)
+			if err != nil {
+				fmt.Printf("Error in the expression passed : %s\n\t %s\n", errorFmt.Sprintf("%s", err), expression)
+				rl.SetPrompt(getPrompt(vm))
 				continue
 			}
+			printValue(v)
+			continue
 		}
 		if expression != "" {
 			expression += "\n"
 		}
 		expression += part
 		if ligo.MatchChars(strings.TrimSpace(expression), 0, '(', ')') > 0 {
-			new = true
+			rl.SetPrompt(getPrompt(vm))
 			running = true
 			v, err := vm.Eval(expression)
 			if err == ligo.ErrSignalRecieved {
@@ -88,14 +78,12 @@ func runInteractive(vm *ligo.VM) {
 				running = false
 				continue
 			}
-			if v.Type != ligo.TypeNil {
-				fmt.Println("Eval :", v.Value)
-			}
+			printValue(v)
 			expression = ""
 			running = false
 			continue
 		}
-		new = false
+		rl.SetPrompt("... ")
 	}
 }
 
@@ -112,6 +100,7 @@ func getPrompt(vm *ligo.VM) string {
 	defaultPrompt := ">>> "
 	ps1, ok := vm.Vars["PS1"]
 	if !ok {
+		vm.Vars["PS1"] = ligo.Variable{Type: ligo.TypeString, Value: defaultPrompt}
 		return defaultPrompt
 	}
 	psraw, ok := ps1.Value.(string)
@@ -119,4 +108,21 @@ func getPrompt(vm *ligo.VM) string {
 		return defaultPrompt
 	}
 	return psraw
+}
+
+func printValue(v ligo.Variable) {
+	if v.Type != ligo.TypeNil {
+		fmt.Println("Eval :", v.Value)
+	}
+}
+
+func handleSignals(vm *ligo.VM, running *bool) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	for sig := range c {
+		if *running {
+			fmt.Fprintln(os.Stderr, sig)
+			vm.Stop()
+		}
+	}
 }

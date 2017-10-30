@@ -57,10 +57,9 @@ The variable `allowed` is set to true. Here is another way to do it.
 This can be translated as :
 
 ```clojure
-(var allowed false)
 (if (> age 18)
-    (set allowed true)
-  (set allowed false))
+    (var allowed true)
+  (var allowed false))
 ```
 
 Next Section : ~~[Loops](2_Loops.md)~~

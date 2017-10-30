@@ -708,8 +708,8 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 		return ligoNil, ErrSignalRecieved
 	}
 	stmt = strings.TrimSpace(stmt)
-	if len(stmt) < 2 {
-		return ligoNil, Error("Expected atleast (), got : " + stmt)
+	if len(stmt) < 1 {
+		return ligoNil, Error("Expected atleast a token, got : " + stmt)
 	}
 	if !rExpression.MatchString(stmt) && MatchChars(stmt, 0, '(', ')') < 0 {
 		return vm.GetVariable(stmt)

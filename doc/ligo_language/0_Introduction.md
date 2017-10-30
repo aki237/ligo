@@ -11,7 +11,7 @@ their parameters in a parenthesis.
 A single function can return a single value which can be a integer, floating point, string,
 a Go native struct, or even a nil value.
 
-Like in C/C++, Go, Java, or Rust, ligo doesn't have to start from a main function.
+Unlike in C/C++, Go, Java, or Rust, ligo doesn't have to start from a main function.
 Like python, the interpreter just reads the given file or any kind of input, and evaluates
 them on the fly.
 

@@ -123,12 +123,13 @@ type ProcessCommon struct {
 // defined function maps, in-built function maps and a global
 // scope pointing to the global Scope VM
 type VM struct {
-	global    *VM
-	exception string
-	Vars      map[string]Variable
-	Funcs     map[string]InBuilt
-	LFuncs    map[string]Defined
-	pc        *ProcessCommon
+	global         *VM
+	exception      string
+	Vars           map[string]Variable
+	Funcs          map[string]InBuilt
+	LFuncs         map[string]Defined
+	pc             *ProcessCommon
+	keywordHandler map[string]func([]string) (Variable, error)
 }
 
 // NewVM returns a new VM object pointer after initializing the values
@@ -139,6 +140,20 @@ func NewVM() *VM {
 	vm.LFuncs = make(map[string]Defined)
 	vm.global = nil
 	vm.pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
+	vm.keywordHandler = map[string]func([]string) (Variable, error){
+		"var":    vm.newVar,
+		"set":    vm.setVar,
+		"fn":     vm.setFn,
+		"return": vm.returnArg,
+		"progn":  vm.runExpressions,
+		"loop":   vm.runLoop,
+		"in":     vm.runIn,
+		"if":     vm.ifClause,
+		"match":  vm.matchClause,
+		"eval":   vm.evalString,
+		"fork":   vm.fork,
+		"delete": vm.deleteVar,
+	}
 	return vm
 }
 
@@ -215,7 +230,7 @@ func (vm *VM) parseToSymbol(token string) (Variable, error) {
 		return function, nil
 	}
 
-	return ligoNil, ErrNoVariable
+	return ligoNil, ErrNoVariable + Error(" : "+token)
 }
 
 // parseToFunc method is used to find the function from the vm and return it.
@@ -226,7 +241,7 @@ func (vm *VM) parseToFunc(token string) (Variable, error) {
 	if fnc, ok := vm.LFuncs[token]; ok {
 		return Variable{Type: TypeDFunc, Value: fnc}, nil
 	}
-	return ligoNil, ErrFuncNotFound
+	return ligoNil, ErrFuncNotFound + Error(" : "+token)
 }
 
 // GetVariable method is used to process the token string passed and get the
@@ -238,7 +253,7 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 		return ligoNil, Error("invalid Token passed")
 	}
 	switch true {
-	case rArray.MatchString(token):
+	case rArray.MatchString(token) || MatchChars(token, 0, '[', ']') > 0:
 		return vm.parseToArray(token)
 	case MatchChars(token, 0, '(', ')') > 0:
 		return vm.Eval(token)
@@ -541,6 +556,37 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 	return ligoNil, nil
 }
 
+// matchClause is used to evaluate the match case construct
+func (vm *VM) matchClause(tkns []string) (Variable, error) {
+	if len(tkns) < 4 && len(tkns)%2 != 0 {
+		return ligoNil, Error("illegal match construct. Should take in atleast 4 arguments")
+	}
+
+	matchVariable, err := vm.GetVariable(tkns[1])
+	if err != nil {
+		return ligoNil, err
+	}
+
+	for i := 1; i <= (len(tkns)/2)-1; i++ {
+		if tkns[2*i] == "_" {
+			if (2 * i) != len(tkns)-2 {
+				return ligoNil, Error("default case '_' should be placed at last")
+			}
+			return vm.Eval(tkns[(2*i)+1])
+		}
+
+		caseVariable, err := vm.GetVariable(tkns[2*i])
+		if err != nil {
+			return ligoNil, err
+		}
+		if caseVariable == matchVariable {
+			return vm.Eval(tkns[(2*i)+1])
+		}
+	}
+	return ligoNil, nil
+
+}
+
 // ifClause is used to evaluate the "if" / "if...else" clause
 // The if or else clause can be another subexp or can be just a variable.
 // This variable is returned and can be passed directly to functions.
@@ -735,31 +781,10 @@ func (vm *VM) Eval(stmt string) (Variable, error) {
 
 // evalKeyword is used to run the corresponding function for the given keyword
 func (vm *VM) evalKeyword(fnName string, tkns []string) (Variable, error) {
-	switch fnName {
-	case "var":
-		return vm.newVar(tkns)
-	case "set":
-		return vm.setVar(tkns)
-	case "fn":
-		return vm.setFn(tkns)
-	case "return":
-		return vm.returnArg(tkns)
-	case "progn":
-		return vm.runExpressions(tkns)
-	case "loop":
-		return vm.runLoop(tkns)
-	case "in":
-		return vm.runIn(tkns)
-	case "if":
-		return vm.ifClause(tkns)
-	case "eval":
-		return vm.evalString(tkns)
-	case "fork":
-		return vm.fork(tkns)
-	case "delete":
-		return vm.deleteVar(tkns)
+	handler, ok := vm.keywordHandler[fnName]
+	if ok {
+		return handler(tkns)
 	}
-
 	return vm.run(tkns)
 }
 

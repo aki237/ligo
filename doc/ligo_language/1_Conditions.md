@@ -134,4 +134,4 @@ Similar to `if...else`, match case can return values.
 In this case the `match` construct evaluates to `"one"`. That value is set to `numberString`.
 
 
-Next Section : ~~[Loops](2_Loops.md)~~
+Next Section : [Loops](2_Loops.md)

@@ -70,6 +70,9 @@ those are keywords. There are a handful of keywords in ligo.
  + `if` :
     - condition construct of ligo.
     - syntax to be discussed later.
+ + `match` :
+    - `switch...case` condition construct of ligo
+    - syntax to be discussed later.
  + `eval` :
     - `eval` keyword is used to evaluate a string as a ligo expression and return the evaluated value.
     - **syntax** : `(eval LIGO_EXPRESSION)`

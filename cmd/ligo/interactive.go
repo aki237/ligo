@@ -29,7 +29,7 @@ func runInteractive(vm *ligo.VM) {
 
 	go handleSignals(vm, &running)
 
-	errorFmt := color.New(color.FgRed).Add(color.Bold).Add(color.BgWhite)
+	errorFmt := color.New(color.FgRed).Add(color.Bold)
 
 	for {
 		part, err := rl.Readline()
@@ -50,7 +50,7 @@ func runInteractive(vm *ligo.VM) {
 		if expression == "" && part[0] != '(' {
 			v, err := vm.Eval(part)
 			if err != nil {
-				fmt.Printf("Error in the expression passed : %s\n\t %s\n", errorFmt.Sprintf("%s", err), expression)
+				fmt.Printf("Error in the expression passed : %s\n", errorFmt.Sprintf("%s", err))
 				rl.SetPrompt(getPrompt(vm))
 				continue
 			}

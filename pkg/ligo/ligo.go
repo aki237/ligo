@@ -128,6 +128,7 @@ type VM struct {
 	Vars           map[string]Variable
 	Funcs          map[string]InBuilt
 	LFuncs         map[string]Defined
+	namespaces     map[string]*VM
 	pc             *ProcessCommon
 	keywordHandler map[string]func([]string) (Variable, error)
 }
@@ -141,19 +142,21 @@ func NewVM() *VM {
 	vm.global = nil
 	vm.pc = &ProcessCommon{Mutex: &sync.Mutex{}, interrupt: false}
 	vm.keywordHandler = map[string]func([]string) (Variable, error){
-		"var":    vm.newVar,
-		"set":    vm.setVar,
-		"fn":     vm.setFn,
-		"return": vm.returnArg,
-		"progn":  vm.runExpressions,
-		"loop":   vm.runLoop,
-		"in":     vm.runIn,
-		"if":     vm.ifClause,
-		"match":  vm.matchClause,
-		"eval":   vm.evalString,
-		"fork":   vm.fork,
-		"delete": vm.deleteVar,
+		"var":       vm.newVar,
+		"set":       vm.setVar,
+		"fn":        vm.setFn,
+		"return":    vm.returnArg,
+		"progn":     vm.runExpressions,
+		"loop":      vm.runLoop,
+		"in":        vm.runIn,
+		"if":        vm.ifClause,
+		"match":     vm.matchClause,
+		"eval":      vm.evalString,
+		"fork":      vm.fork,
+		"delete":    vm.deleteVar,
+		"namespace": vm.namespaceEval,
 	}
+	vm.namespaces = make(map[string]*VM)
 	return vm
 }
 
@@ -225,6 +228,18 @@ func (vm *VM) parseToSymbol(token string) (Variable, error) {
 	if ok {
 		return Variable{Type: varFromVM.Type, Value: varFromVM.Value}, nil
 	}
+
+	nss := strings.Split(token, ".")
+
+	if len(strings.Split(token, ".")) > 1 {
+		ns := nss[0]
+		fn := strings.Join(nss[1:], ".")
+		namespace, ok := vm.namespaces[ns]
+		if ok {
+			return namespace.parseToSymbol(fn)
+		}
+	}
+
 	function, err := vm.parseToFunc(token)
 	if err == nil {
 		return function, nil
@@ -241,6 +256,18 @@ func (vm *VM) parseToFunc(token string) (Variable, error) {
 	if fnc, ok := vm.LFuncs[token]; ok {
 		return Variable{Type: TypeDFunc, Value: fnc}, nil
 	}
+
+	nss := strings.Split(token, ".")
+
+	if len(strings.Split(token, ".")) > 1 {
+		ns := nss[0]
+		fn := strings.Join(nss[1:], ".")
+		namespace, ok := vm.namespaces[ns]
+		if ok {
+			return namespace.parseToFunc(fn)
+		}
+	}
+
 	return ligoNil, ErrFuncNotFound + Error(" : "+token)
 }
 
@@ -370,7 +397,17 @@ func (vm *VM) newVar(tokens []string) (Variable, error) {
 // If found it returns the inbuilt and true, else nil and false.
 func (vm *VM) getInBuiltFunction(fnName string) (InBuilt, bool) {
 	fn, found := vm.Funcs[fnName]
-	return fn, found
+	if found {
+		return fn, found
+	}
+	v, err := vm.parseToSymbol(fnName)
+	if err != nil {
+		return nil, false
+	}
+	if v.Type != TypeIFunc {
+		return nil, false
+	}
+	return v.Value.(InBuilt), true
 }
 
 // runInBuiltFunction method is a small helper method to run the passed inbuilt function
@@ -383,7 +420,17 @@ func (vm *VM) runInBuiltFunction(function InBuilt, vars []Variable) (Variable, e
 // If found it returns the inbuilt and true, else nil and false.
 func (vm *VM) getDefinedFunction(fnName string) (Defined, bool) {
 	fn, found := vm.LFuncs[fnName]
-	return fn, found
+	if found {
+		return fn, found
+	}
+	v, err := vm.parseToSymbol(fnName)
+	if err != nil {
+		return Defined{}, false
+	}
+	if v.Type != TypeDFunc {
+		return Defined{}, false
+	}
+	return v.Value.(Defined), true
 }
 
 // RunDefined method is an outlet of the runDefinedFunction function
@@ -467,16 +514,15 @@ func (vm *VM) run(tkns []string) (Variable, error) {
 		return vm.runDefinedFunction(function, fnName, vars)
 	}
 	if vm.global == nil {
-		return ligoNil, Error("Function '" + fnName + "' not found")
+		return ligoNil, Error("Function '" + fnName + "' not found in any of the namespaces")
 	}
 	if function, ok := vm.global.getInBuiltFunction(fnName); ok {
 		return vm.runInBuiltFunction(function, vars)
 	}
-	function, ok := vm.global.getDefinedFunction(fnName)
-	if !ok {
-		return ligoNil, Error("Function '" + fnName + "' not found")
+	if function, ok := vm.global.getDefinedFunction(fnName); ok {
+		return vm.runDefinedFunction(function, fnName, vars)
 	}
-	return vm.runDefinedFunction(function, fnName, vars)
+	return ligoNil, Error("Function '" + fnName + "' not found")
 }
 
 // runLoop method is used to run the "loop" construct
@@ -659,6 +705,39 @@ func (vm *VM) fork(tkns []string) (Variable, error) {
 	}
 	go vm.Eval(tkns[1])
 	return ligoNil, nil
+}
+
+// namespaceEval method is used to run the code in a namespace environment
+func (vm *VM) namespaceEval(tkns []string) (Variable, error) {
+	if len(tkns) < 3 {
+		return ligoNil, Error("Expected atleast 3 expressions, got " + fmt.Sprint(len(tkns)))
+	}
+
+	ns := tkns[1]
+	splitted := strings.Split(ns, ".")
+	nss, ok := vm.namespaces[splitted[0]]
+	if !ok {
+		vm.namespaces[splitted[0]] = vm.NewScope()
+		nss = vm.namespaces[splitted[0]]
+	}
+	if len(splitted) < 2 {
+		for i, val := range tkns[2:] {
+			v, err := nss.Eval(val)
+			if err != nil {
+				return ligoNil, err
+			}
+			if i == len(tkns[2:])-1 {
+				return v, nil
+			}
+		}
+	}
+	newTkns := make([]string, 0)
+	newTkns = append(newTkns, []string{tkns[0], strings.Join(splitted[2:], ".")}...)
+	for _, val := range newTkns[2:] {
+		newTkns = append(newTkns, val)
+	}
+
+	return nss.namespaceEval(newTkns)
 }
 
 // runExpressions method is used to run the passed sub-expressions

@@ -253,7 +253,7 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 		return ligoNil, Error("invalid Token passed")
 	}
 	switch true {
-	case rArray.MatchString(token) || MatchChars(token, 0, '[', ']') > 0:
+	case MatchChars(token, 0, '[', ']') > 0:
 		return vm.parseToArray(token)
 	case MatchChars(token, 0, '(', ')') > 0:
 		return vm.Eval(token)

@@ -867,6 +867,24 @@ func (vm *VM) evalKeyword(fnName string, tkns []string) (Variable, error) {
 	return vm.run(tkns)
 }
 
+// GetNameSpace method is used to get the namespace scope corresponding to the name passed
+func (vm *VM) GetNameSpace(ns string) *VM {
+	namespace, ok := vm.namespaces[ns]
+	if !ok {
+		return nil
+	}
+	return namespace
+}
+
+// CreateNamespace method is used to create a new namespace if it doesn't exist
+func (vm *VM) CreateNamespace(ns string) *VM {
+	if namespace := vm.GetNameSpace(ns); namespace != nil {
+		return namespace
+	}
+	vm.namespaces[ns] = vm.NewScope()
+	return vm.namespaces[ns]
+}
+
 // Clone method is used to clone the VM and return the clone one.
 func (vm *VM) Clone() *VM {
 	nvm := NewVM()

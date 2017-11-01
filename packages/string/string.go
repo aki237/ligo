@@ -9,31 +9,31 @@ import (
 
 // PluginInit function is the plugin initializer for the string package
 func PluginInit(vm *ligo.VM) {
-	vm.Funcs["string-indexOf"] = vmStringIndexOf
-	vm.Funcs["string-replace"] = vmStringReplace
-	vm.Funcs["string-split"] = vmStringSplit
-	vm.Funcs["string-splitAfter"] = vmStringSplitAfter
-	vm.Funcs["string-splitN"] = vmStringSplitN
-	vm.Funcs["string-splitAfterN"] = vmStringSplitAfterN
-	vm.Funcs["string-trimSpace"] = vmStringTrimSpace
-	vm.Funcs["string-lowerCase"] = vmStringLowerCase
-	vm.Funcs["string-upperCase"] = vmStringUpperCase
-	vm.Funcs["string-fromArray"] = vmStringFromArray
-	vm.Funcs["string-hasPrefix"] = vmStringHasPrefix
-	vm.Funcs["string-hasSuffix"] = vmStringHasSuffix
-	vm.Funcs["string-compare"] = vmStringCompare
-	vm.Funcs["string-repeat"] = vmStringRepeat
-	vm.Funcs["string-count"] = vmStringCount
-	vm.Funcs["string-contains"] = vmStringContains
-	vm.Funcs["string-containsAny"] = vmStringContainsAny
-	vm.Funcs["string-lastIndex"] = vmStringLastIndex
-	vm.Funcs["string-lastIndexAny"] = vmStringLastIndexAny
-	vm.Funcs["string-trim"] = vmStringTrim
-	vm.Funcs["string-trimPrefix"] = vmStringTrimPrefix
-	vm.Funcs["string-trimSuffix"] = vmStringTrimSuffix
-	vm.Funcs["string-trimLeft"] = vmStringTrimLeft
-	vm.Funcs["string-trimRight"] = vmStringTrimRight
-	vm.Funcs["string-join"] = vmStringJoin
+	vm.Funcs["indexOf"] = vmStringIndexOf
+	vm.Funcs["replace"] = vmStringReplace
+	vm.Funcs["split"] = vmStringSplit
+	vm.Funcs["splitAfter"] = vmStringSplitAfter
+	vm.Funcs["splitN"] = vmStringSplitN
+	vm.Funcs["splitAfterN"] = vmStringSplitAfterN
+	vm.Funcs["trimSpace"] = vmStringTrimSpace
+	vm.Funcs["lowerCase"] = vmStringLowerCase
+	vm.Funcs["upperCase"] = vmStringUpperCase
+	vm.Funcs["fromArray"] = vmStringFromArray
+	vm.Funcs["hasPrefix"] = vmStringHasPrefix
+	vm.Funcs["hasSuffix"] = vmStringHasSuffix
+	vm.Funcs["compare"] = vmStringCompare
+	vm.Funcs["repeat"] = vmStringRepeat
+	vm.Funcs["count"] = vmStringCount
+	vm.Funcs["contains"] = vmStringContains
+	vm.Funcs["containsAny"] = vmStringContainsAny
+	vm.Funcs["lastIndex"] = vmStringLastIndex
+	vm.Funcs["lastIndexAny"] = vmStringLastIndexAny
+	vm.Funcs["trim"] = vmStringTrim
+	vm.Funcs["trimPrefix"] = vmStringTrimPrefix
+	vm.Funcs["trimSuffix"] = vmStringTrimSuffix
+	vm.Funcs["trimLeft"] = vmStringTrimLeft
+	vm.Funcs["trimRight"] = vmStringTrimRight
+	vm.Funcs["join"] = vmStringJoin
 }
 
 func vmStringFromArray(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

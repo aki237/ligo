@@ -10,11 +10,11 @@ import (
 
 // PluginInit function is the plugin initializer for the file package
 func PluginInit(vm *ligo.VM) {
-	vm.Funcs["file-open"] = vmFileOpen   // (file-open "filename.txt" "rw") => file handler   | panics
-	vm.Funcs["file-read"] = vmFileRead   // (file-read fh nchars)           => string         | panics
-	vm.Funcs["file-close"] = vmFileClose // (file-close fh)                 => nil            | error
-	vm.Funcs["file-seek"] = vmFileSeek   // (file-seek fh amt from)         => current offset | panics
-	vm.Funcs["file-write"] = vmFileWrite // (file-write fh string)          => written amount | panics
+	vm.Funcs["open"] = vmFileOpen   // (open "filename.txt" "rw") => file handler   | panics
+	vm.Funcs["read"] = vmFileRead   // (read fh nchars)           => string         | panics
+	vm.Funcs["close"] = vmFileClose // (close fh)                 => nil            | error
+	vm.Funcs["seek"] = vmFileSeek   // (seek fh amt from)         => current offset | panics
+	vm.Funcs["write"] = vmFileWrite // (write fh string)          => written amount | panics
 }
 
 func vmFileSeek(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

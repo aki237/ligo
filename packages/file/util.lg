@@ -1,17 +1,17 @@
 ;; file-readAll function is used to read all contents of a file
-(fn file-readAll |filename|
+(fn readAll |filename|
     (progn
-      (var fh (file-open filename "r"))
+      (var fh (file.open filename "r"))
       (var read 300)
       (var control true)
       (var str "")
       (var temp "")
       (loop control
             (progn
-              (set temp (file-read fh read))
+              (set temp (file.read fh read))
               (set str (+ str temp))
               (if (> read (len temp))
                   (set control false))))
-      (file-close fh)
+      (file.close fh)
       str
       ))

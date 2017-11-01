@@ -9,7 +9,7 @@ import (
 
 // PluginInit function is the plugin initializer for the url package
 func PluginInit(vm *ligo.VM) {
-	vm.Funcs["url-get"] = vmURLGet
+	vm.Funcs["get"] = vmURLGet
 }
 
 func vmURLGet(vm *ligo.VM, a ...ligo.Variable) ligo.Variable {

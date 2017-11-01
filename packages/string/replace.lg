@@ -1,5 +1,5 @@
 ;; string-replaceAll function replaces all the "old" occurrences in the "original"
 ;; string with "new"
-(fn string-replaceAll |original old new|
-    (string-replace original old new -1)
+(fn replaceAll |original old new|
+    (string.replace original old new -1)
     )

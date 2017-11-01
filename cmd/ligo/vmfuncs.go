@@ -72,6 +72,13 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 		home = ligopath
 	}
 
+	packageNameSpace := filepath.Base(packageName)
+
+	tvm := vm
+	if packageNameSpace != "base" {
+		tvm = vm.CreateNamespace(packageNameSpace)
+	}
+
 	dir := filepath.Join(home, "ligo", "lib", packageName)
 	if !exists(dir) {
 		return ligo.Error("Package \"" + packageName + "\" not found in the system")
@@ -99,7 +106,7 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 					panic(err)
 				}
 
-				init.(func(*ligo.VM))(vm)
+				init.(func(*ligo.VM))(tvm)
 			}
 			continue
 		}
@@ -107,7 +114,7 @@ func LoadPackage(vm *ligo.VM, packageName string) error {
 		if err != nil {
 			return err
 		}
-		err = vm.LoadReader(file)
+		err = tvm.LoadReader(file)
 		if err != nil {
 			panic(err)
 		}

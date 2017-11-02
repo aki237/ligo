@@ -460,6 +460,14 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 
 	nvm := vm.NewScope()
 	for i, val := range function.scopevars {
+		if len(vars)-1 < i {
+			if isVariate(val) {
+				val = val[3:]
+				nvm.Vars[val] = Variable{Type: TypeArray, Value: make([]Variable, 0)}
+				break
+			}
+			return ligoNil, Error("Not enough arguments to call the function")
+		}
 		switch vars[i].Type {
 		case TypeIFunc:
 			nvm.Funcs[val] = vars[i].Value.(InBuilt)

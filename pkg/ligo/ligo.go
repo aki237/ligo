@@ -131,6 +131,7 @@ type VM struct {
 	namespaces     map[string]*VM
 	pc             *ProcessCommon
 	keywordHandler map[string]func([]string) (Variable, error)
+	isNamespace    bool
 }
 
 // NewVM returns a new VM object pointer after initializing the values
@@ -157,6 +158,7 @@ func NewVM() *VM {
 		"namespace": vm.namespaceEval,
 	}
 	vm.namespaces = make(map[string]*VM)
+	vm.isNamespace = false
 	return vm
 }
 
@@ -245,7 +247,11 @@ func (vm *VM) parseToSymbol(token string) (Variable, error) {
 		return function, nil
 	}
 
-	return ligoNil, ErrNoVariable + Error(" : "+token)
+	if vm.global == nil {
+		return ligoNil, ErrNoVariable + Error(" : "+token)
+	}
+
+	return vm.global.parseToSymbol(token)
 }
 
 // parseToFunc method is used to find the function from the vm and return it.
@@ -294,10 +300,8 @@ func (vm *VM) GetVariable(token string) (Variable, error) {
 		return Variable{Type: TypeBool, Value: true}, nil
 	case token == "false":
 		return Variable{Type: TypeBool, Value: false}, nil
-	case rVariable.MatchString(token):
-		return vm.parseToSymbol(token)
 	}
-	return vm.parseToFunc(token)
+	return vm.parseToSymbol(token)
 }
 
 // setFn is used to parse a ligo function construct and store it in the
@@ -492,8 +496,18 @@ func (vm *VM) runDefinedFunction(function Defined, fnName string, vars []Variabl
 
 // run is the method used to call the functions (defined or in-built) with the arguments
 func (vm *VM) run(tkns []string) (Variable, error) {
-	vars := make([]Variable, 0)
 	fnName := tkns[0]
+	nspaces := strings.Split(fnName, ".")
+	if len(nspaces) >= 2 {
+		ns, ok := vm.namespaces[nspaces[0]]
+		if ok {
+			ntkns := tkns
+			ntkns[0] = strings.Join(nspaces[1:], ".")
+			return ns.run(ntkns)
+		}
+	}
+
+	vars := make([]Variable, 0)
 	for i := 1; i < len(tkns); i++ {
 
 		if len(tkns[i]) > 3 && tkns[i][:3] == "..." && tkns[i][3] != '.' {
@@ -725,8 +739,7 @@ func (vm *VM) namespaceEval(tkns []string) (Variable, error) {
 	splitted := strings.Split(ns, ".")
 	nss, ok := vm.namespaces[splitted[0]]
 	if !ok {
-		vm.namespaces[splitted[0]] = vm.NewScope()
-		nss = vm.namespaces[splitted[0]]
+		nss = vm.CreateNamespace(splitted[0])
 	}
 	if len(splitted) < 2 {
 		for i, val := range tkns[2:] {
@@ -890,6 +903,7 @@ func (vm *VM) CreateNamespace(ns string) *VM {
 		return namespace
 	}
 	vm.namespaces[ns] = vm.NewScope()
+	vm.namespaces[ns].isNamespace = true
 	return vm.namespaces[ns]
 }
 
@@ -913,7 +927,7 @@ func (vm *VM) Clone() *VM {
 // (if the current vm is the parent vm, then it is set as the global, else the global of the current vm is set )
 func (vm *VM) NewScope() *VM {
 	nvm := NewVM()
-	if vm.global == nil {
+	if vm.global == nil || vm.isNamespace {
 		nvm.global = vm
 	} else {
 		nvm.global = vm.global

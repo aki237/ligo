@@ -156,6 +156,7 @@ func NewVM() *VM {
 		"fork":      vm.fork,
 		"delete":    vm.deleteVar,
 		"namespace": vm.namespaceEval,
+		"lambda":    vm.lambdaEval,
 	}
 	vm.namespaces = make(map[string]*VM)
 	vm.isNamespace = false
@@ -759,6 +760,24 @@ func (vm *VM) namespaceEval(tkns []string) (Variable, error) {
 	}
 
 	return nss.namespaceEval(newTkns)
+}
+
+// lambdaEval is used to evaluate a lambda expression and return a
+// ligo function
+func (vm *VM) lambdaEval(tkns []string) (Variable, error) {
+	if len(tkns) != 3 {
+		return ligoNil, Error("Error in the lambda construct")
+	}
+
+	closure := tkns[1]
+	body := tkns[2]
+
+	if !rClosure.MatchString(tkns[2]) {
+		return ligoNil, Error("malformed closure in the lambda, near " + closure)
+	}
+	varNames := getVarsFromClosure(closure)
+	fn := Variable{Type: TypeDFunc, Value: Defined{scopevars: varNames, eval: body}}
+	return fn, nil
 }
 
 // runExpressions method is used to run the passed sub-expressions

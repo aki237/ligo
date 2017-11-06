@@ -1,0 +1,29 @@
+(require "base")
+;; namespace is a new construct introduced in the language.
+;; namespace is a small container for functions and variables.
+
+;; Creating a new namespace in ligo is very easy.
+;; Consider C++
+;; ```c++
+;; namespace greeter {
+;;     std::string greeting = "Hello";
+;; }
+
+;; Similar to that defining a namespace is easy.
+(namespace greeter
+           (var greeting "Hello")
+           (fn greet |name|
+               (+ greeting " " name "!!")))
+
+
+;; Accessing the functions is simple.
+;; Simply append the namespace name with
+;; a dot and the function name to call it
+(println (greeter.greet "Noah"))
+
+;; Now by default the packages imported in the ligo interpreter
+;; will be imported in a new namespace. (except for base)
+;; So calling the funtions from any package is as follows
+(require "string")
+
+(println (string.repeat "#" 20))

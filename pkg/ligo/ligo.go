@@ -157,6 +157,7 @@ func NewVM() *VM {
 		"delete":    vm.deleteVar,
 		"namespace": vm.namespaceEval,
 		"lambda":    vm.lambdaEval,
+		"struct":    vm.structEval,
 	}
 	vm.namespaces = make(map[string]*VM)
 	vm.isNamespace = false
@@ -223,6 +224,27 @@ func (vm *VM) parseToString(token string) (Variable, error) {
 	return Variable{Type: TypeString, Value: token[1 : len(token)-1]}, nil
 }
 
+func getStructVar(strct Variable, key string) (Variable, error) {
+	keys, ok := strct.Value.(map[string]Variable)
+	if strct.Type != TypeStruct || !ok {
+		return ligoNil, Error("passed variable is not a struct and doesn't have a member named '" + key + "'")
+	}
+	varName := key
+	if strings.Contains(key, ":") {
+		varName = strings.Split(key, ":")[0]
+		v, ok := keys[varName]
+		if !ok {
+			return ligoNil, Error("no such key found in the struct : \"" + key + "\"")
+		}
+		return getStructVar(v, strings.Join(strings.Split(key, ":")[1:], ":"))
+	}
+	v, ok := keys[varName]
+	if !ok {
+		return ligoNil, Error("no such key found in the struct : \"" + key + "\"")
+	}
+	return v, nil
+}
+
 // parseToSymbol method is used to fetch the variable from the VM.
 // If the variable is not found, it checks whether a function is found
 // and returns it.
@@ -230,6 +252,15 @@ func (vm *VM) parseToSymbol(token string) (Variable, error) {
 	varFromVM, ok := vm.Vars[token]
 	if ok {
 		return Variable{Type: varFromVM.Type, Value: varFromVM.Value}, nil
+	}
+
+	if strings.Contains(token, ":") {
+		varName := strings.Split(token, ":")[0]
+		v, err := vm.parseToSymbol(varName)
+		if err != nil {
+			return v, err
+		}
+		return getStructVar(v, strings.Join(strings.Split(token, ":")[1:], ":"))
 	}
 
 	nss := strings.Split(token, ".")
@@ -623,6 +654,27 @@ func (vm *VM) runIn(tkns []string) (Variable, error) {
 		delete(vm.Vars, iterVar)
 	}
 	return ligoNil, nil
+}
+
+// structEval method is used to evaluate the struct construct
+// and return the corresponding variable
+func (vm *VM) structEval(tkns []string) (Variable, error) {
+	if len(tkns) < 3 && len(tkns)%2 == 0 {
+		return ligoNil, Error("illegal struct construct. Should take in atleast 3 arguments")
+	}
+
+	mapVar := make(map[string]Variable)
+
+	for i := 0; i < (len(tkns) / 2); i++ {
+		index := 1 + (2 * i)
+		key := tkns[index]
+		val, err := vm.GetVariable(tkns[index+1])
+		if err != nil {
+			return ligoNil, err
+		}
+		mapVar[key] = val
+	}
+	return Variable{Type: TypeStruct, Value: mapVar}, nil
 }
 
 // matchClause is used to evaluate the match case construct

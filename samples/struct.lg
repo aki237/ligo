@@ -1,0 +1,22 @@
+;; Struct is a type of construct in ligo that can contains any key value pair
+;; The operation is similar to a map but the syntax is easier compared to
+;; accessing, modifying maps
+
+(require "base")
+
+;; This is a simple example of how to define a new struct object
+(var p
+     (struct
+      Name      "John Doe"
+      Age       20
+      Email     "john.doe@example.com"
+      )
+     )
+
+;; Accessing structs is very simple as well.
+;; In C, C++ or any C style languages, the struct member is accessed using a "."
+;; In ligo ":" is used (similar to lua)
+(printf "I'm %s.\nMy age is %d.\nMy e-mail address is '%s'.\n" p:Name p:Age p:Email)
+
+;; At the moment the structs members are considered to be immutable.
+;; If you have to edit a struct, re-define the struct and set it.

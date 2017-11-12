@@ -13,7 +13,7 @@ var versionString = "0.0.1"
 
 func usage() {
 	printVersion()
-	fmt.Println("Usage : ligo [filename]")
+	fmt.Println("Usage : ligo [filenames]")
 	flag.PrintDefaults()
 }
 

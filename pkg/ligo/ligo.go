@@ -56,7 +56,7 @@ func reformEscapes(str string) string {
 
 // regexp variables for matching the syntax of the script
 var rInteger = regexp.MustCompile(`^[+-]?[0-9]+$`)
-var rFloat = regexp.MustCompile(`^[+-]?[0-9]*\\.[0-9]+$`)
+var rFloat = regexp.MustCompile(`^[+-]?[0-9]*\.[0-9]+$`)
 var rString = regexp.MustCompile(`^\".*\"$`)
 var rVariable = regexp.MustCompile(`^[[:alpha:]]+[[:alnum:]]*$`)
 var rExpression = regexp.MustCompile(`^\\(.*\\)$`)

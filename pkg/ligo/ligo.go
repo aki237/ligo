@@ -15,6 +15,7 @@ var escapeSequences = map[string]int{
 	"\\\\": 0x5C,
 	"\\a":  0x07,
 	"\\b":  0x08,
+	"\\e":  0x1B,
 	"\\f":  0x0C,
 	"\\n":  0x0A,
 	"\\r":  0x0D,
@@ -22,6 +23,19 @@ var escapeSequences = map[string]int{
 	"\\v":  0x0B,
 	"\\'":  0x27,
 	"\"":   0x22,
+	"\\ ":  0x20,
+	"\\!":  0x21,
+	"\\#":  0x23,
+	"\\$":  0x24,
+	"\\%":  0x25,
+	"\\&":  0x26,
+	"\\*":  0x2A,
+	"\\<":  0x3C,
+	"\\=":  0x3D,
+	"\\>":  0x3E,
+	"\\?":  0x3F,
+	"\\|":  0x7C,
+	"\\~":  0x7E,
 }
 
 // TODO : add escape sequence handling for hex and octal sequences...
